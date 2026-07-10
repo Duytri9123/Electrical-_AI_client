@@ -11,6 +11,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import DeviceTable from "./components/DeviceTable";
 import ReviewModal from "./components/ReviewModal";
+import PanelDesign from "./components/PanelDesign";
 
 type TabKey = "sld" | "library" | "export" | "panel";
 
@@ -65,6 +66,8 @@ export default function DashboardPage() {
   const [analysisResult, setAnalysisResult] = useState<Device[] | null>(null);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [modelUsed, setModelUsed] = useState<string | null>(null);
+  const [layoutData, setLayoutData] = useState<any>(null);
+  const [graphData, setGraphData] = useState<any>(null);
 
   // Review Modal states
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -225,6 +228,8 @@ export default function DashboardPage() {
     try {
       const res = await api.post(`/projects/${uploadedFile.project_id}/analyze`);
       setAnalysisResult(res.data.data.devices);
+      setLayoutData(res.data.data.layout);
+      setGraphData(res.data.data.graph);
       setResponseTime(res.data.data.response_time);
       setModelUsed(res.data.data.model_used);
     } catch (err: any) {
@@ -566,6 +571,7 @@ export default function DashboardPage() {
               <span>🔍 Review</span>
             </button>
             <button
+              onClick={() => setActiveTab("panel")}
               className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 border border-emerald-600 rounded-lg text-xs font-bold text-white transition-all cursor-pointer"
             >
               <span>→ Layout ↗</span>
@@ -580,7 +586,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Interactive Device Table */}
+          {/* Interactive Device Table or Panel Design */}
           {analyzing ? (
             <div className="flex-1 flex flex-col items-center justify-center py-16 space-y-6">
               <div className="relative w-20 h-20 flex items-center justify-center">
@@ -598,6 +604,12 @@ export default function DashboardPage() {
                 <p className="text-xs text-slate-500 font-medium">Matching to database...</p>
               </div>
             </div>
+          ) : activeTab === "panel" && analysisResult ? (
+            <PanelDesign
+              devices={analysisResult}
+              layoutData={layoutData}
+              graphData={graphData}
+            />
           ) : analysisResult ? (
             <DeviceTable
               devices={analysisResult}
