@@ -430,7 +430,10 @@ export default function DashboardPage() {
   };
 
   const deviceCount = analysisResult?.length ?? 0;
+  const branchesCount = analysisResult?.filter((d) => (d.level ?? 1) > 0).length ?? 0;
   const matchCount = analysisResult?.filter((d) => d.status === "matched").length ?? 0;
+  const mainDevice = analysisResult?.find((d) => (d.level ?? 1) === 0);
+  const mainCbRating = mainDevice ? `${mainDevice.current}A` : "—";
   const userFullName = user?.profile?.full_name || user?.name || "User";
   const userEmail = user?.email || "";
   const userInitial = userFullName.charAt(0).toUpperCase();
@@ -491,48 +494,59 @@ export default function DashboardPage() {
           {/* Status widgets Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <div className="dashboard-card p-3 flex items-center space-x-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-              <svg className="w-6 h-6 text-amber-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-                <rect x="4" y="4" width="16" height="16" rx="2" />
-                <path d="M9 9h6v6H9z" />
-                <path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2" />
-              </svg>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <path d="M9 9h6v6H9z" />
+                </svg>
+              </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">DEVICES</div>
-                <div className="text-sm font-bold">{deviceCount} devices</div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DEVICES</div>
+                <div className="text-base font-extrabold text-emerald-600 leading-none mt-0.5">{deviceCount}</div>
+                <div className="text-[9.5px] text-slate-400 font-medium mt-0.5">Total {deviceCount} devices</div>
               </div>
             </div>
 
             <div className="dashboard-card p-3 flex items-center space-x-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-              <svg className="w-6 h-6 text-sky-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-                <circle cx="6" cy="6" r="2.5" />
-                <circle cx="18" cy="6" r="2.5" />
-                <circle cx="12" cy="18" r="2.5" />
-                <path d="M6 8.5v3a2 2 0 002 2h8a2 2 0 002-2v-3M12 13.5v2" />
-              </svg>
+              <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="6" cy="6" r="2.5" />
+                  <circle cx="18" cy="6" r="2.5" />
+                  <circle cx="12" cy="18" r="2.5" />
+                  <path d="M6 8.5v3a2 2 0 002 2h8a2 2 0 002-2v-3M12 13.5v2" />
+                </svg>
+              </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">BRANCHES</div>
-                <div className="text-sm font-bold">{deviceCount > 0 ? Math.ceil(deviceCount / 2) : 0} branches</div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">BRANCHES</div>
+                <div className="text-base font-extrabold text-sky-600 leading-none mt-0.5">{branchesCount}</div>
+                <div className="text-[9.5px] text-slate-400 font-medium mt-0.5">Active: {branchesCount} branches</div>
               </div>
             </div>
 
             <div className="dashboard-card p-3 flex items-center space-x-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-              <svg className="w-6 h-6 text-purple-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-                <rect x="5" y="3" width="14" height="18" rx="2" />
-                <path d="M9 8l6 4-6 4" />
-              </svg>
+              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-amber-550" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: '#d97706' }}>
+                  <rect x="5" y="3" width="14" height="18" rx="2" />
+                  <path d="M9 8l6 4-6 4" />
+                </svg>
+              </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">MAIN CB</div>
-                <div className="text-sm font-bold">{deviceCount > 0 ? "1 Main" : "0"}</div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">MAIN CB</div>
+                <div className="text-base font-extrabold text-amber-600 leading-none mt-0.5">{mainCbRating}</div>
+                <div className="text-[9.5px] text-slate-400 font-medium mt-0.5">{mainDevice ? "1 Main, 0 Swgr" : "0 Main, 0 Swgr"}</div>
               </div>
             </div>
 
             <div className="dashboard-card p-3 flex items-center space-x-3 bg-white border border-slate-200 rounded-lg shadow-sm">
-              <svg className="w-6 h-6 text-emerald-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-                <path d="M3 8h13l-3-3M21 16H8l3 3" />
-              </svg>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M3 8h13l-3-3M21 16H8l3 3" />
+                </svg>
+              </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">DB MATCH</div>
-                <div className="text-sm font-bold">{matchCount} matches</div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DB MATCH</div>
+                <div className="text-base font-extrabold text-emerald-600 leading-none mt-0.5">{deviceCount > 0 ? `${matchCount}/${deviceCount}` : "—"}</div>
+                <div className="text-[9.5px] text-slate-400 font-medium mt-0.5">{matchCount} direct matches</div>
               </div>
             </div>
           </div>

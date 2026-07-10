@@ -31,33 +31,23 @@ export default function DeviceTable({
 }: DeviceTableProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col flex-1 shadow-sm">
-      <div className="p-3 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-        <span className="text-xs font-bold text-slate-800">Danh sách thiết bị</span>
-        <button
-          onClick={onAddDevice}
-          className="px-2.5 py-1 text-[11px] bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold rounded transition-colors"
-        >
-          + Thêm Thiết Bị
-        </button>
-      </div>
-
       <div className="flex-1 overflow-x-auto">
         <table className="w-full text-left border-collapse text-[11px]">
           <thead>
-            <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
-              <th className="p-2 w-8 text-center">#</th>
-              <th className="p-2 w-12 text-center">LV</th>
-              <th className="p-2 min-w-[120px]">CIRCUIT / LOAD</th>
-              <th className="p-2 w-20">TYPE</th>
-              <th className="p-2 w-16">POLES</th>
-              <th className="p-2 w-16">IN (A)</th>
-              <th className="p-2 w-16">ICU (kA)</th>
-              <th className="p-2 w-16">IΔ (mA)</th>
-              <th className="p-2 min-w-[80px]">CABLE</th>
-              <th className="p-2 w-16">P (kW)</th>
-              <th className="p-2 w-16 text-center">MATCH</th>
-              <th className="p-2 min-w-[150px]">MATCHED MODEL</th>
-              <th className="p-2 w-10 text-center"></th>
+            <tr className="bg-slate-50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-200">
+              <th className="p-2 w-8 text-center text-[10px]">#</th>
+              <th className="p-2 w-12 text-center text-[10px]">LV</th>
+              <th className="p-2 min-w-[120px] text-[10px]">CIRCUIT / LOAD</th>
+              <th className="p-2 w-20 text-[10px]">TYPE</th>
+              <th className="p-2 w-16 text-[10px]">POLES</th>
+              <th className="p-2 w-16 text-[10px]">IN (A)</th>
+              <th className="p-2 w-16 text-[10px]">ICU (kA)</th>
+              <th className="p-2 w-16 text-[10px]">IΔ (mA)</th>
+              <th className="p-2 min-w-[80px] text-[10px]">CABLE</th>
+              <th className="p-2 w-16 text-[10px]">P (kW)</th>
+              <th className="p-2 w-16 text-center text-[10px]">MATCH</th>
+              <th className="p-2 min-w-[150px] text-[10px]">MATCHED MODEL</th>
+              <th className="p-2 w-10 text-center text-[10px]"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -71,7 +61,7 @@ export default function DeviceTable({
                   <select
                     value={dev.level ?? 1}
                     onChange={(e) => onUpdateDevice(idx, "level", parseInt(e.target.value))}
-                    className={`w-10 text-center py-0.5 font-bold rounded border cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
+                    className={`w-10 text-center py-0.5 font-bold rounded border cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-555 ${
                       (dev.level ?? 1) === 0
                         ? "bg-emerald-50 text-emerald-600 border-emerald-200"
                         : "bg-blue-50 text-blue-600 border-blue-200"
@@ -89,7 +79,7 @@ export default function DeviceTable({
                     type="text"
                     value={dev.circuit}
                     onChange={(e) => onUpdateDevice(idx, "circuit", e.target.value)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
                 </td>
 
@@ -98,7 +88,7 @@ export default function DeviceTable({
                   <select
                     value={dev.type}
                     onChange={(e) => onUpdateDevice(idx, "type", e.target.value)}
-                    className="w-full px-1.5 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none cursor-pointer"
+                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer"
                   >
                     <option value="ACB">ACB</option>
                     <option value="MCCB">MCCB</option>
@@ -113,7 +103,7 @@ export default function DeviceTable({
                   <select
                     value={dev.pole}
                     onChange={(e) => onUpdateDevice(idx, "pole", parseInt(e.target.value))}
-                    className="w-full px-1.5 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none cursor-pointer"
+                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer"
                   >
                     <option value={1}>1P</option>
                     <option value={2}>2P</option>
@@ -128,7 +118,7 @@ export default function DeviceTable({
                     type="number"
                     value={dev.current}
                     onChange={(e) => onUpdateDevice(idx, "current", parseInt(e.target.value) || 0)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
                 </td>
 
@@ -138,7 +128,7 @@ export default function DeviceTable({
                     type="text"
                     value={dev.icu}
                     onChange={(e) => onUpdateDevice(idx, "icu", e.target.value)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
                 </td>
 
@@ -148,7 +138,7 @@ export default function DeviceTable({
                     type="text"
                     value={dev.leakage ?? "-"}
                     onChange={(e) => onUpdateDevice(idx, "leakage", e.target.value)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
                 </td>
 
@@ -159,7 +149,7 @@ export default function DeviceTable({
                     value={dev.cable ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "cable", e.target.value)}
                     placeholder="—"
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
                 </td>
 
@@ -169,7 +159,7 @@ export default function DeviceTable({
                     type="number"
                     value={dev.power ?? 0}
                     onChange={(e) => onUpdateDevice(idx, "power", parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
                 </td>
 
@@ -186,7 +176,7 @@ export default function DeviceTable({
                     type="text"
                     value={dev.model}
                     onChange={(e) => onUpdateDevice(idx, "model", e.target.value)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none font-mono text-[10.5px] font-semibold text-slate-700 bg-slate-50/50"
+                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 font-mono text-[10.5px] font-semibold text-slate-700"
                   />
                 </td>
 
