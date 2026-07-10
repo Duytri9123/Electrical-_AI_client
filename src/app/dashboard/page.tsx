@@ -250,8 +250,12 @@ export default function DashboardPage() {
   };
 
   const handleLogout = async () => {
-    await logout();
-    router.replace("/login");
+    try {
+      await logout();
+    } catch {
+      // ignore errors, always redirect
+    }
+    window.location.href = "/login";
   };
 
   // Add a new row to devices list

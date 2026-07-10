@@ -4,7 +4,7 @@ export type AideApiFieldError = { field: string; message: string };
 
 export const webApi = axios.create({
   baseURL: "/api",
-  timeout: 15000,
+  timeout: 90000,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
