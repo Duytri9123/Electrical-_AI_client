@@ -46,10 +46,10 @@ async function storeSession(session: SessionPayload) {
     secure,
     path: "/",
     priority: "high",
-    maxAge: Math.max(60, session.expires_in),
+    maxAge: Math.max(300, session.expires_in),
   });
 
-  const refreshMaxAge = Math.max(60, Math.floor((new Date(session.refresh_expires_at).getTime() - Date.now()) / 1000));
+  const refreshMaxAge = Math.max(3600, Math.floor((new Date(session.refresh_expires_at).getTime() - Date.now()) / 1000));
   cookieStore.set(refreshCookie, session.refresh_token, {
     httpOnly: true,
     sameSite: "lax",
