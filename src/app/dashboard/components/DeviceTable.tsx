@@ -161,9 +161,19 @@ export default function DeviceTable({
 
                 {/* Database Match Status Badge */}
                 <td className="p-2 text-center">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-600 uppercase">
-                    OK
-                  </span>
+                  {dev.status === "upsized" ? (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 border border-amber-200 text-amber-600 uppercase whitespace-nowrap">
+                      ↑ Upsized
+                    </span>
+                  ) : dev.status === "not_found" ? (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-50 border border-red-200 text-rose-600 uppercase whitespace-nowrap">
+                      Not Found
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-600 uppercase whitespace-nowrap">
+                      OK
+                    </span>
+                  )}
                 </td>
 
                 {/* Matched Model string */}
