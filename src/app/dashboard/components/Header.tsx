@@ -16,8 +16,8 @@ interface HeaderProps {
   notifLoading: boolean;
   handleMarkAllRead: () => void;
   handleReadNotif: (id: number, link: string | null) => void;
-  userMenuRef: React.RefObject<HTMLDivElement>;
-  notifMenuRef: React.RefObject<HTMLDivElement>;
+  userMenuRef: React.RefObject<HTMLDivElement | null>;
+  notifMenuRef: React.RefObject<HTMLDivElement | null>;
   // Restored props
   tokens: number;
   role: string;

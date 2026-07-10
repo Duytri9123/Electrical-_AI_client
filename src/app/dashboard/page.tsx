@@ -17,12 +17,16 @@ type TabKey = "sld" | "library" | "export" | "panel";
 
 interface Device {
   id: string;
+  level?: number;
   circuit: string;
   type: string;
   pole: number;
   current: number;
   icu: string;
-  brand: string;
+  leakage?: string;
+  cable?: string;
+  power?: number;
+  brand?: string;
   model: string;
   status: string;
 }
@@ -439,7 +443,7 @@ export default function DashboardPage() {
   const matchCount = analysisResult?.filter((d) => d.status === "matched").length ?? 0;
   const mainDevice = analysisResult?.find((d) => (d.level ?? 1) === 0);
   const mainCbRating = mainDevice ? `${mainDevice.current}A` : "—";
-  const userFullName = user?.profile?.full_name || user?.name || "User";
+  const userFullName = user?.profile?.full_name || "User";
   const userEmail = user?.email || "";
   const userInitial = userFullName.charAt(0).toUpperCase();
 
