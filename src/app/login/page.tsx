@@ -64,11 +64,9 @@ function LoginPageContent() {
         <div className="lg:col-span-7 flex flex-col space-y-5 animate-slide-up">
           {/* Brand */}
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-sm">
-              A
-            </div>
-            <span className="text-xl font-extrabold tracking-tight text-slate-800">
-              AIDE <span className="text-xs font-medium text-slate-500">AI Design Electric</span>
+            <img src="/Images/logo.png" alt="Electrical AI" className="h-8 object-contain" />
+            <span className="text-lg font-extrabold tracking-tight text-slate-800 uppercase">
+              Electrical AI
             </span>
           </div>
 

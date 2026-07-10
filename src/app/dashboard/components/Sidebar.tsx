@@ -33,15 +33,10 @@ export default function Sidebar({
           sidebarOpen ? "fixed inset-y-0 left-0 z-50" : "hidden"
         } lg:flex w-72 bg-white border-r border-slate-200 flex-col flex-shrink-0`}
       >
-        <div className="flex items-center space-x-2.5 px-4 py-3.5 border-b border-slate-200">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-bold text-base text-white shadow-sm">
-            A
-          </div>
+        <div className="flex items-center space-x-2.5 px-4 py-3 border-b border-slate-200">
+          <img src="/Images/logo.png" alt="Electrical AI" className="h-8 object-contain" />
           <div>
-            <span className="text-base font-extrabold tracking-tight text-slate-800">AIDE</span>
-            <span className="block text-[9px] font-medium text-slate-400 leading-tight">
-              AI Design Electric
-            </span>
+            <span className="text-xs font-bold tracking-wider text-slate-800 uppercase block">Electrical AI</span>
           </div>
         </div>
 
