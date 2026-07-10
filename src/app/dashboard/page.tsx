@@ -59,13 +59,13 @@ export default function DashboardPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  
+
   // AI Analysis states
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<Device[] | null>(null);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [modelUsed, setModelUsed] = useState<string | null>(null);
-  
+
   // Review Modal states
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
@@ -181,7 +181,7 @@ export default function DashboardPage() {
       const pid = projRes.data.data.id;
       const form = new FormData();
       form.append("file", file);
-      
+
       const uploadRes = await api.post(`/projects/${pid}/upload`, form, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                 <span>The IMAGE upload zone has been temporarily disabled by the administrator. Please use the PDF zone below.</span>
               </div>
             )}
-            
+
             {isImageEnabled ? (
               <div
                 onClick={handleClickUpload}
@@ -324,7 +324,7 @@ export default function DashboardPage() {
                     <span className="text-[9px] px-1.5 py-0.5 bg-slate-200 text-slate-500 rounded font-bold">DXF</span>
                   </div>
                 </div>
-                
+
                 <div
                   onClick={handleClickUpload}
                   onDrop={handleDrop}
@@ -362,12 +362,12 @@ export default function DashboardPage() {
                 <div className="flex-shrink-0 text-3xl text-slate-400">
                   {uploadedFile.file_type === "page_image" ? "🖼" : "📄"}
                 </div>
-                <div className="flex-1 text-[11px] text-slate-500 space-y-0.5 ml-2">
+                <div className="flex-1 text-[11px] text-slate-500 space-y-0.5 ">
                   <div className="truncate font-medium text-slate-700">{uploadedFile.file_name}</div>
                   <div>{formatSize(uploadedFile.file_size)}</div>
                 </div>
                 <button onClick={() => setUploadedFile(null)}
-                  className="absolute -top-6 -right-0.5 w-5 h-5 px-2 flex items-center justify-center rounded-full bg-slate-300 hover:bg-red-400 hover:text-white text-slate-500 text-[11px] font-bold transition-colors z-10 cursor-pointer shadow-sm">
+                  className="absolute -top-3 -right-1 w-5 h-5 px-2 flex items-center justify-center rounded-full bg-slate-300 hover:bg-red-400 hover:text-white text-slate-500 text-[11px] font-bold transition-colors z-10 cursor-pointer shadow-sm">
                   ✕
                 </button>
               </div>
@@ -408,9 +408,9 @@ export default function DashboardPage() {
         return (
           <div className="space-y-2 text-sm text-slate-600">
             {[{ icon: "🏷", label: "Nhãn hiệu", detail: "4 brands" },
-              { icon: "🗂", label: "Danh mục", detail: "5 categories" },
-              { icon: "📦", label: "Dòng SP", detail: "8 series" },
-              { icon: "🔧", label: "Model", detail: "12 models" },
+            { icon: "🗂", label: "Danh mục", detail: "5 categories" },
+            { icon: "📦", label: "Dòng SP", detail: "8 series" },
+            { icon: "🔧", label: "Model", detail: "12 models" },
             ].map((it, i) => (
               <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg">
                 <span>{it.icon} <b>{it.label}</b></span>
@@ -477,9 +477,8 @@ export default function DashboardPage() {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === key ? "border-blue-600 text-blue-700" : "border-transparent text-slate-400 hover:text-slate-600"
-              }`}
+              className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === key ? "border-blue-600 text-blue-700" : "border-transparent text-slate-400 hover:text-slate-600"
+                }`}
             >
               {{ sld: "📄 SLD Reader", library: "📂 Library", export: "📤 Export", panel: "🧩 Panel Design" }[key]}
             </button>
@@ -488,7 +487,7 @@ export default function DashboardPage() {
 
         {/* MAIN BODY */}
         <main className="flex-1 bg-slate-50 p-3 sm:p-5 flex flex-col space-y-4 overflow-y-auto">
-          
+
           {/* Status widgets Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <div className="dashboard-card p-3 flex items-center space-x-3 bg-white border border-slate-200 rounded-lg shadow-sm">
@@ -568,16 +567,31 @@ export default function DashboardPage() {
           )}
 
           {/* Interactive Device Table */}
-          {analysisResult && (
+          {analyzing ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-16 space-y-6">
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <svg className="animate-spin w-20 h-20 text-emerald-600" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" />
+                  <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <div className="absolute text-2xl animate-pulse">📋</div>
+              </div>
+              <div className="text-center space-y-3">
+                <h3 className="text-sm font-bold text-slate-700 tracking-wider">SERVER is analyzing...</h3>
+                <div className="w-56 bg-slate-200 h-1.5 rounded-full overflow-hidden mx-auto mt-1 relative">
+                  <div className="bg-emerald-650 h-full rounded-full absolute left-0 top-0 animate-[pulse_1s_infinite] w-3/4" style={{ backgroundColor: '#10b981' }}></div>
+                </div>
+                <p className="text-xs text-slate-500 font-medium">Matching to database...</p>
+              </div>
+            </div>
+          ) : analysisResult ? (
             <DeviceTable
               devices={analysisResult}
               onUpdateDevice={handleUpdateDevice}
               onRemoveDevice={handleRemoveDevice}
               onAddDevice={handleAddRow}
             />
-          )}
-
-          {!analysisResult && (
+          ) : (
             <div className="flex-1 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-center space-y-2">
               <div className="text-3xl text-slate-300">📋</div>
               <h3 className="text-sm font-bold text-slate-400">Bắt đầu bằng cách tải lên bản vẽ</h3>
