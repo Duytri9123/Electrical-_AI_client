@@ -34,7 +34,7 @@ export default function Sidebar({
         } lg:flex w-72 bg-white border-r border-slate-200 flex-col flex-shrink-0`}
       >
         <div className="flex items-center space-x-2.5 px-4 py-3 border-b border-slate-200">
-          <img src="/Images/logo.png" alt="Electrical AI" className="h-8 object-contain" />
+          <img src="/Images/logo.png" alt="Electrical AI" className="h-10 object-contain" />
           <div>
             <span className="text-xs font-bold tracking-wider text-slate-800 uppercase block">Electrical AI</span>
           </div>
