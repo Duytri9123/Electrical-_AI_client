@@ -40,7 +40,7 @@ export default function DeviceTable({
               <th className="p-2 min-w-[120px] text-[10px]">CIRCUIT / LOAD</th>
               <th className="p-2 w-20 text-[10px]">TYPE</th>
               <th className="p-2 w-16 text-[10px]">POLES</th>
-              <th className="p-2 w-16 text-[10px]">IN (A)</th>
+              <th className="p-2 w-20 text-[10px]">IN (A)</th>
               <th className="p-2 w-16 text-[10px]">ICU (kA)</th>
               <th className="p-2 w-16 text-[10px]">IΔ (mA)</th>
               <th className="p-2 min-w-[80px] text-[10px]">CABLE</th>
@@ -58,19 +58,15 @@ export default function DeviceTable({
 
                 {/* LV (Level) Column */}
                 <td className="p-2 text-center">
-                  <select
-                    value={dev.level ?? 1}
-                    onChange={(e) => onUpdateDevice(idx, "level", parseInt(e.target.value))}
-                    className={`w-10 text-center py-0.5 font-bold rounded border cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-555 ${
+                  <span
+                    className={`inline-flex items-center justify-center w-5 h-5 font-bold rounded text-[10px] ${
                       (dev.level ?? 1) === 0
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                        : "bg-blue-50 text-blue-600 border-blue-200"
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                        : "bg-blue-50 text-blue-600 border border-blue-200"
                     }`}
                   >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
-                    <option value={2}>2</option>
-                  </select>
+                    {dev.level ?? 1}
+                  </span>
                 </td>
 
                 {/* Circuit / Load */}
