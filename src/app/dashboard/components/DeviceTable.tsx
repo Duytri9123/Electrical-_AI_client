@@ -2,12 +2,16 @@ import React from "react";
 
 interface Device {
   id: string;
+  level?: number;
   circuit: string;
   type: string;
   pole: number;
   current: number;
   icu: string;
-  brand: string;
+  leakage?: string;
+  cable?: string;
+  power?: number;
+  brand?: string;
   model: string;
   status: string;
 }
@@ -37,36 +41,64 @@ export default function DeviceTable({
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-left border-collapse text-xs">
+      <div className="flex-1 overflow-x-auto">
+        <table className="w-full text-left border-collapse text-[11px]">
           <thead>
             <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
-              <th className="p-3">Ký hiệu/Mạch</th>
-              <th className="p-3">Loại</th>
-              <th className="p-3">Số Cực</th>
-              <th className="p-3">Dòng định mức (A)</th>
-              <th className="p-3">Icu (kA)</th>
-              <th className="p-3">Hãng</th>
-              <th className="p-3">Mã thiết bị</th>
-              <th className="p-3 text-right">Hành động</th>
+              <th className="p-2 w-8 text-center">#</th>
+              <th className="p-2 w-12 text-center">LV</th>
+              <th className="p-2 min-w-[120px]">CIRCUIT / LOAD</th>
+              <th className="p-2 w-20">TYPE</th>
+              <th className="p-2 w-16">POLES</th>
+              <th className="p-2 w-16">IN (A)</th>
+              <th className="p-2 w-16">ICU (kA)</th>
+              <th className="p-2 w-16">IΔ (mA)</th>
+              <th className="p-2 min-w-[80px]">CABLE</th>
+              <th className="p-2 w-16">P (kW)</th>
+              <th className="p-2 w-16 text-center">MATCH</th>
+              <th className="p-2 min-w-[150px]">MATCHED MODEL</th>
+              <th className="p-2 w-10 text-center"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {devices.map((dev, idx) => (
               <tr key={dev.id} className="hover:bg-slate-50/50">
-                <td className="p-2.5">
+                {/* Index Column */}
+                <td className="p-2 text-center text-slate-500 font-medium">{idx + 1}</td>
+
+                {/* LV (Level) Column */}
+                <td className="p-2 text-center">
+                  <select
+                    value={dev.level ?? 1}
+                    onChange={(e) => onUpdateDevice(idx, "level", parseInt(e.target.value))}
+                    className={`w-10 text-center py-0.5 font-bold rounded border cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
+                      (dev.level ?? 1) === 0
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                        : "bg-blue-50 text-blue-600 border-blue-200"
+                    }`}
+                  >
+                    <option value={0}>0</option>
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                  </select>
+                </td>
+
+                {/* Circuit / Load */}
+                <td className="p-2">
                   <input
                     type="text"
                     value={dev.circuit}
                     onChange={(e) => onUpdateDevice(idx, "circuit", e.target.value)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none"
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
                   />
                 </td>
-                <td className="p-2.5">
+
+                {/* Type Selection */}
+                <td className="p-2">
                   <select
                     value={dev.type}
                     onChange={(e) => onUpdateDevice(idx, "type", e.target.value)}
-                    className="px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none"
+                    className="w-full px-1.5 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none cursor-pointer"
                   >
                     <option value="ACB">ACB</option>
                     <option value="MCCB">MCCB</option>
@@ -75,11 +107,13 @@ export default function DeviceTable({
                     <option value="SPD">SPD</option>
                   </select>
                 </td>
-                <td className="p-2.5">
+
+                {/* Poles Selection */}
+                <td className="p-2">
                   <select
                     value={dev.pole}
                     onChange={(e) => onUpdateDevice(idx, "pole", parseInt(e.target.value))}
-                    className="px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none"
+                    className="w-full px-1.5 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none cursor-pointer"
                   >
                     <option value={1}>1P</option>
                     <option value={2}>2P</option>
@@ -87,45 +121,83 @@ export default function DeviceTable({
                     <option value={4}>4P</option>
                   </select>
                 </td>
-                <td className="p-2.5">
+
+                {/* Current IN (A) */}
+                <td className="p-2">
                   <input
                     type="number"
                     value={dev.current}
                     onChange={(e) => onUpdateDevice(idx, "current", parseInt(e.target.value) || 0)}
-                    className="w-20 px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none"
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
                   />
                 </td>
-                <td className="p-2.5">
+
+                {/* ICU (kA) */}
+                <td className="p-2">
                   <input
                     type="text"
                     value={dev.icu}
                     onChange={(e) => onUpdateDevice(idx, "icu", e.target.value)}
-                    className="w-20 px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none"
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
                   />
                 </td>
-                <td className="p-2.5">
+
+                {/* Leakage current (mA) */}
+                <td className="p-2">
                   <input
                     type="text"
-                    value={dev.brand}
-                    onChange={(e) => onUpdateDevice(idx, "brand", e.target.value)}
-                    className="w-24 px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none"
+                    value={dev.leakage ?? "-"}
+                    onChange={(e) => onUpdateDevice(idx, "leakage", e.target.value)}
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
                   />
                 </td>
-                <td className="p-2.5">
+
+                {/* Cable Specifications */}
+                <td className="p-2">
+                  <input
+                    type="text"
+                    value={dev.cable ?? ""}
+                    onChange={(e) => onUpdateDevice(idx, "cable", e.target.value)}
+                    placeholder="—"
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                  />
+                </td>
+
+                {/* Power (kW) */}
+                <td className="p-2">
+                  <input
+                    type="number"
+                    value={dev.power ?? 0}
+                    onChange={(e) => onUpdateDevice(idx, "power", parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none"
+                  />
+                </td>
+
+                {/* Database Match Status Badge */}
+                <td className="p-2 text-center">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-600 uppercase">
+                    OK
+                  </span>
+                </td>
+
+                {/* Matched Model string */}
+                <td className="p-2">
                   <input
                     type="text"
                     value={dev.model}
                     onChange={(e) => onUpdateDevice(idx, "model", e.target.value)}
-                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-blue-400 focus:outline-none font-mono"
+                    className="w-full px-2 py-1 border border-slate-200 rounded focus:border-emerald-500 focus:outline-none font-mono text-[10.5px] font-semibold text-slate-700 bg-slate-50/50"
                   />
                 </td>
-                <td className="p-2.5 text-right">
+
+                {/* Actions: delete row */}
+                <td className="p-2 text-center">
                   <button
                     onClick={() => onRemoveDevice(idx)}
-                    className="p-1 text-red-500 hover:bg-red-50 rounded"
-                    title="Xóa dòng"
+                    className="w-5 h-5 flex items-center justify-center text-xs font-bold text-red-500 hover:text-white hover:bg-red-500 rounded border border-red-200 hover:border-red-500 transition-all cursor-pointer"
+                    title="Xóa thiết bị"
                   >
-                    🗑️
+                    ×
                   </button>
                 </td>
               </tr>
