@@ -24,7 +24,7 @@ export async function backendFetch(path: string, init?: RequestInit) {
       ...init,
       headers,
       cache: "no-store",
-      signal: init?.signal ?? AbortSignal.timeout(12000),
+      signal: init?.signal ?? AbortSignal.timeout(90000),
     });
   } catch (err) {
     console.error("Backend fetch error:", err);
