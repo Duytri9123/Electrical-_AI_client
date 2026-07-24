@@ -118,15 +118,8 @@ export default function Sidebar({
   const [panelMainTab, setPanelMainTab] = useState<"devices" | "layers" | "stats" | "export">("devices");
   const [panelFilterSearch, setPanelFilterSearch] = useState("");
 
-  const activeDwgDevices = dwgStudioData?.devices && dwgStudioData.devices.length > 0
-    ? dwgStudioData.devices
-    : analysisResult && analysisResult.length > 0
-    ? analysisResult
-    : [];
-
-  const activeDwgLayers = dwgStudioData?.layers && dwgStudioData.layers.length > 0
-    ? dwgStudioData.layers
-    : cadLayers;
+  const activeDwgDevices = dwgStudioData?.devices || [];
+  const activeDwgLayers = dwgStudioData?.layers || cadLayers || [];
 
   return (
     <aside
@@ -564,20 +557,11 @@ export default function Sidebar({
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleClickUpload()}
-                    className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
                     <UploadCloud className="w-4 h-4" />
-                    <span>Chọn File DWG</span>
+                    <span>Chọn File DWG / DXF</span>
                   </button>
-                  {dwgStudioData?.onLoadSample && (
-                    <button
-                      onClick={dwgStudioData.onLoadSample}
-                      className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center space-x-1 cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Mẫu</span>
-                    </button>
-                  )}
                 </div>
               )}
             </div>

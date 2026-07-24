@@ -1354,6 +1354,8 @@ export default function DashboardPage() {
           ) : activeTab === "panel" ? (
             <div className="w-full h-full flex-1 overflow-hidden">
               <DwgCadStudio
+                devices={analysisResult || []}
+                projectName={layoutData?.panel_name || (historyProjects.length > 0 ? historyProjects[0]?.name : "DB FACADE 12F")}
                 onSyncDevicesToBoq={async (devs) => {
                   // 1. Set devices immediately for fast UI update
                   setAnalysisResult(devs as any);
