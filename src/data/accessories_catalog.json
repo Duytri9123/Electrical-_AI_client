@@ -1,0 +1,451 @@
+{
+  "version": "1.0",
+  "updated": "2026-06-05",
+  "categories": {
+    "busbar": {
+      "name": "Thanh đồng Busbar",
+      "icon": "⚡",
+      "items": [
+        {
+          "id": "bb_15x1_2_L1",
+          "name": "Busbar 15×1.2 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 1.2,
+          "h_mm": 15,
+          "len_mm": 400,
+          "section_mm2": 18,
+          "I_rated": 27,
+          "note": "I = 1.5 × 18 = 27A"
+        },
+        {
+          "id": "bb_15x1_2_L2",
+          "name": "Busbar 15×1.2 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 1.2,
+          "h_mm": 15,
+          "len_mm": 400,
+          "section_mm2": 18,
+          "I_rated": 27
+        },
+        {
+          "id": "bb_15x1_2_L3",
+          "name": "Busbar 15×1.2 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 1.2,
+          "h_mm": 15,
+          "len_mm": 400,
+          "section_mm2": 18,
+          "I_rated": 27
+        },
+        {
+          "id": "bb_15x1_2_N",
+          "name": "Busbar 15×1.2 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 1.2,
+          "h_mm": 15,
+          "len_mm": 400,
+          "section_mm2": 18,
+          "I_rated": 27
+        },
+        {
+          "id": "bb_20x2_L1",
+          "name": "Busbar 20×2 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 2,
+          "h_mm": 20,
+          "len_mm": 400,
+          "section_mm2": 40,
+          "I_rated": 60,
+          "note": "I = 1.5 × 40 = 60A"
+        },
+        {
+          "id": "bb_20x2_L2",
+          "name": "Busbar 20×2 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 2,
+          "h_mm": 20,
+          "len_mm": 400,
+          "section_mm2": 40,
+          "I_rated": 60
+        },
+        {
+          "id": "bb_20x2_L3",
+          "name": "Busbar 20×2 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 2,
+          "h_mm": 20,
+          "len_mm": 400,
+          "section_mm2": 40,
+          "I_rated": 60
+        },
+        {
+          "id": "bb_20x2_N",
+          "name": "Busbar 20×2 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 2,
+          "h_mm": 20,
+          "len_mm": 400,
+          "section_mm2": 40,
+          "I_rated": 60
+        },
+        {
+          "id": "bb_25x3_L1",
+          "name": "Busbar 25×3 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 3,
+          "h_mm": 25,
+          "len_mm": 400,
+          "section_mm2": 75,
+          "I_rated": 112,
+          "note": "I = 1.5 × 75 = 112A"
+        },
+        {
+          "id": "bb_25x3_L2",
+          "name": "Busbar 25×3 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 3,
+          "h_mm": 25,
+          "len_mm": 400,
+          "section_mm2": 75,
+          "I_rated": 112
+        },
+        {
+          "id": "bb_25x3_L3",
+          "name": "Busbar 25×3 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 3,
+          "h_mm": 25,
+          "len_mm": 400,
+          "section_mm2": 75,
+          "I_rated": 112
+        },
+        {
+          "id": "bb_25x3_N",
+          "name": "Busbar 25×3 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 3,
+          "h_mm": 25,
+          "len_mm": 400,
+          "section_mm2": 75,
+          "I_rated": 112
+        },
+        {
+          "id": "bb_30x5_L1",
+          "name": "Busbar 30×5 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 5,
+          "h_mm": 30,
+          "len_mm": 400,
+          "section_mm2": 150,
+          "I_rated": 225
+        },
+        {
+          "id": "bb_30x5_L2",
+          "name": "Busbar 30×5 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 5,
+          "h_mm": 30,
+          "len_mm": 400,
+          "section_mm2": 150,
+          "I_rated": 225
+        },
+        {
+          "id": "bb_30x5_L3",
+          "name": "Busbar 30×5 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 5,
+          "h_mm": 30,
+          "len_mm": 400,
+          "section_mm2": 150,
+          "I_rated": 225
+        },
+        {
+          "id": "bb_30x5_N",
+          "name": "Busbar 30×5 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 5,
+          "h_mm": 30,
+          "len_mm": 400,
+          "section_mm2": 150,
+          "I_rated": 225
+        },
+        {
+          "id": "bb_40x5_L1",
+          "name": "Busbar 40×5 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 5,
+          "h_mm": 40,
+          "len_mm": 400,
+          "section_mm2": 200,
+          "I_rated": 300
+        },
+        {
+          "id": "bb_40x5_L2",
+          "name": "Busbar 40×5 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 5,
+          "h_mm": 40,
+          "len_mm": 400,
+          "section_mm2": 200,
+          "I_rated": 300
+        },
+        {
+          "id": "bb_40x5_L3",
+          "name": "Busbar 40×5 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 5,
+          "h_mm": 40,
+          "len_mm": 400,
+          "section_mm2": 200,
+          "I_rated": 300
+        },
+        {
+          "id": "bb_40x5_N",
+          "name": "Busbar 40×5 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 5,
+          "h_mm": 40,
+          "len_mm": 400,
+          "section_mm2": 200,
+          "I_rated": 300
+        },
+        {
+          "id": "bb_50x5_L1",
+          "name": "Busbar 50×5 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 5,
+          "h_mm": 50,
+          "len_mm": 400,
+          "section_mm2": 250,
+          "I_rated": 375
+        },
+        {
+          "id": "bb_50x5_L2",
+          "name": "Busbar 50×5 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 5,
+          "h_mm": 50,
+          "len_mm": 400,
+          "section_mm2": 250,
+          "I_rated": 375
+        },
+        {
+          "id": "bb_50x5_L3",
+          "name": "Busbar 50×5 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 5,
+          "h_mm": 50,
+          "len_mm": 400,
+          "section_mm2": 250,
+          "I_rated": 375
+        },
+        {
+          "id": "bb_50x5_N",
+          "name": "Busbar 50×5 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 5,
+          "h_mm": 50,
+          "len_mm": 400,
+          "section_mm2": 250,
+          "I_rated": 375
+        },
+        {
+          "id": "bb_60x10_L1",
+          "name": "Busbar 60×10 L1",
+          "phase": "L1",
+          "color": "#e53935",
+          "w_mm": 10,
+          "h_mm": 60,
+          "len_mm": 400,
+          "section_mm2": 600,
+          "I_rated": 900
+        },
+        {
+          "id": "bb_60x10_L2",
+          "name": "Busbar 60×10 L2",
+          "phase": "L2",
+          "color": "#f9a825",
+          "w_mm": 10,
+          "h_mm": 60,
+          "len_mm": 400,
+          "section_mm2": 600,
+          "I_rated": 900
+        },
+        {
+          "id": "bb_60x10_L3",
+          "name": "Busbar 60×10 L3",
+          "phase": "L3",
+          "color": "#1565c0",
+          "w_mm": 10,
+          "h_mm": 60,
+          "len_mm": 400,
+          "section_mm2": 600,
+          "I_rated": 900
+        },
+        {
+          "id": "bb_60x10_N",
+          "name": "Busbar 60×10 N",
+          "phase": "N",
+          "color": "#212121",
+          "w_mm": 10,
+          "h_mm": 60,
+          "len_mm": 400,
+          "section_mm2": 600,
+          "I_rated": 900
+        },
+        {
+          "id": "bb_60x10_PE",
+          "name": "Busbar 60×10 PE",
+          "phase": "PE",
+          "color": "#2e7d32",
+          "w_mm": 10,
+          "h_mm": 60,
+          "len_mm": 400,
+          "section_mm2": 600,
+          "I_rated": 900
+        }
+      ]
+    },
+    "din_rail": {
+      "name": "Thanh DIN Rail",
+      "icon": "📏",
+      "items": [
+        {
+          "id": "din_35_400",
+          "name": "DIN Rail 35mm",
+          "color": "#9e9e9e",
+          "w_mm": 400,
+          "h_mm": 35,
+          "d_mm": 8,
+          "len_mm": 400,
+          "type": "TH35"
+        }
+      ]
+    },
+    "strut": {
+      "name": "Thanh tiêu chuẩn",
+      "icon": "▦",
+      "items": [
+        {
+          "id": "strut_400",
+          "name": "Thanh tiêu chuẩn",
+          "color": "#1e3a8a",
+          "w_mm": 40,
+          "h_mm": 400,
+          "d_mm": 15,
+          "len_mm": 400,
+          "hole_mm": 10,
+          "pitch_mm": 25
+        }
+      ]
+    },
+    "cable_duct": {
+      "name": "Máng cáp",
+      "icon": "🔲",
+      "items": [
+        {
+          "id": "duct_25x25",
+          "name": "Máng cáp 25×25",
+          "color": "#bdbdbd",
+          "w_mm": 25,
+          "h_mm": 25,
+          "len_mm": 400
+        },
+        {
+          "id": "duct_40x40",
+          "name": "Máng cáp 40×40",
+          "color": "#bdbdbd",
+          "w_mm": 40,
+          "h_mm": 40,
+          "len_mm": 400
+        },
+        {
+          "id": "duct_60x40",
+          "name": "Máng cáp 60×40",
+          "color": "#bdbdbd",
+          "w_mm": 60,
+          "h_mm": 40,
+          "len_mm": 400
+        },
+        {
+          "id": "duct_80x60",
+          "name": "Máng cáp 80×60",
+          "color": "#bdbdbd",
+          "w_mm": 80,
+          "h_mm": 60,
+          "len_mm": 400
+        },
+        {
+          "id": "duct_100x60",
+          "name": "Máng cáp 100×60",
+          "color": "#bdbdbd",
+          "w_mm": 100,
+          "h_mm": 60,
+          "len_mm": 400
+        }
+      ]
+    },
+    "mounting_plate": {
+      "name": "Tấm kê AT (Mounting Plate)",
+      "icon": "⬜",
+      "items": [
+        {
+          "id": "mp_100x150",
+          "name": "Tấm kê 100×150",
+          "color": "#e0e0e0",
+          "w_mm": 100,
+          "h_mm": 150,
+          "d_mm": 2
+        },
+        {
+          "id": "mp_150x200",
+          "name": "Tấm kê 150×200",
+          "color": "#e0e0e0",
+          "w_mm": 150,
+          "h_mm": 200,
+          "d_mm": 2
+        },
+        {
+          "id": "mp_200x300",
+          "name": "Tấm kê 200×300",
+          "color": "#e0e0e0",
+          "w_mm": 200,
+          "h_mm": 300,
+          "d_mm": 2
+        },
+        {
+          "id": "mp_300x400",
+          "name": "Tấm kê 300×400",
+          "color": "#e0e0e0",
+          "w_mm": 300,
+          "h_mm": 400,
+          "d_mm": 2
+        }
+      ]
+    }
+  }
+}

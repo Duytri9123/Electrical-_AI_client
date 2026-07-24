@@ -1,13 +1,18 @@
 import { backendFetch, saveSessionFromBackend } from "@/lib/server/backend";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const reqBody = await request.json();
+    const identifier = reqBody.identifier || reqBody.email;
     const response = await backendFetch("/auth/login", {
       method: "POST",
       body: JSON.stringify({
-        ...reqBody,
+        identifier,
+        email: reqBody.email,
+        password: reqBody.password,
         platform: "web",
         device_name: "AIDE Web",
       }),

@@ -17,6 +17,7 @@ export async function backendFetch(path: string, init?: RequestInit) {
   try {
     const headers = new Headers(init?.headers);
     headers.set("Accept", "application/json");
+    headers.set("Connection", "close");
     if (!(init?.body instanceof FormData) && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
@@ -24,7 +25,7 @@ export async function backendFetch(path: string, init?: RequestInit) {
       ...init,
       headers,
       cache: "no-store",
-      signal: init?.signal ?? AbortSignal.timeout(90000),
+      signal: init?.signal ?? AbortSignal.timeout(15000),
     });
   } catch (err) {
     console.error("Backend fetch error:", err);
@@ -40,16 +41,18 @@ async function storeSession(session: SessionPayload) {
   const cookieStore = await cookies();
   const secure = process.env.NODE_ENV === "production";
   
+  const accessMaxAge = 24 * 3600; // 24 hours (1 full day inactivity limit)
+  const refreshMaxAge = 90 * 24 * 3600; // 90 days
+
   cookieStore.set(accessCookie, session.access_token, {
     httpOnly: true,
     sameSite: "lax",
     secure,
     path: "/",
     priority: "high",
-    maxAge: Math.max(300, session.expires_in),
+    maxAge: accessMaxAge,
   });
 
-  const refreshMaxAge = Math.max(3600, Math.floor((new Date(session.refresh_expires_at).getTime() - Date.now()) / 1000));
   cookieStore.set(refreshCookie, session.refresh_token, {
     httpOnly: true,
     sameSite: "lax",
@@ -81,13 +84,15 @@ async function rotateSession(): Promise<string | null> {
   });
 
   if (!response.ok) {
-    await clearSessionCookies();
     return null;
   }
 
   const payload = await response.json();
-  await storeSession(payload.data);
-  return payload.data.access_token;
+  if (payload.data) {
+    await storeSession(payload.data);
+    return payload.data.access_token;
+  }
+  return null;
 }
 
 export async function authenticatedBackendFetch(path: string, init?: RequestInit) {
@@ -97,26 +102,33 @@ export async function authenticatedBackendFetch(path: string, init?: RequestInit
   if (!accessToken) {
     accessToken = await rotateSession() ?? undefined;
   }
-  if (!accessToken) return null;
+
+  const headers: Record<string, string> = {};
+  if (init?.headers) {
+    const initHeaders = new Headers(init.headers);
+    initHeaders.forEach((v, k) => {
+      headers[k] = v;
+    });
+  }
+
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
 
   let response = await backendFetch(path, {
     ...init,
-    headers: {
-      ...init?.headers,
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers,
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && accessToken) {
     accessToken = await rotateSession() ?? undefined;
-    if (!accessToken) return response;
-    response = await backendFetch(path, {
-      ...init,
-      headers: {
-        ...init?.headers,
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    if (accessToken) {
+      headers["Authorization"] = `Bearer ${accessToken}`;
+      response = await backendFetch(path, {
+        ...init,
+        headers,
+      });
+    }
   }
 
   return response;

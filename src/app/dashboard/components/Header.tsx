@@ -1,8 +1,13 @@
 import React from "react";
 import Link from "next/link";
 
+type TabKey = "sld" | "boq" | "history" | "library" | "panel";
+
 interface HeaderProps {
+  sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  activeTab: TabKey;
+  setActiveTab: (tab: TabKey) => void;
   userInitial: string;
   userFullName: string;
   userEmail: string;
@@ -19,12 +24,15 @@ interface HeaderProps {
   userMenuRef: React.RefObject<HTMLDivElement | null>;
   notifMenuRef: React.RefObject<HTMLDivElement | null>;
   // Restored props
-  tokens: number;
-  role: string;
+  tokens?: number;
+  role?: string;
 }
 
 export default function Header({
+  sidebarOpen,
   setSidebarOpen,
+  activeTab,
+  setActiveTab,
   userInitial,
   userFullName,
   userEmail,
@@ -44,26 +52,44 @@ export default function Header({
   role,
 }: HeaderProps) {
   return (
-    <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 shadow-sm">
-      <div className="flex items-center space-x-3">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-1 text-xs sm:text-sm">
-          <Link href="/huong-dan" className="px-2 sm:px-2.5 py-1.5 text-slate-600 hover:text-blue-600 font-semibold rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap">📖 Hướng dẫn</Link>
-          <Link href="/blog" className="px-2 sm:px-2.5 py-1.5 text-slate-600 hover:text-blue-600 font-semibold rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap">📰 Blog</Link>
-          <span className="text-slate-300 mx-0.5">|</span>
-          <Link href="/about" className="px-2 sm:px-2.5 py-1.5 text-slate-600 hover:text-blue-600 font-semibold rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap">Giới thiệu</Link>
-          <Link href="/privacy" className="px-2 sm:px-2.5 py-1.5 text-slate-600 hover:text-blue-600 font-semibold rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap">Bảo mật</Link>
-          <Link href="/terms" className="px-2 sm:px-2.5 py-1.5 text-slate-600 hover:text-blue-600 font-semibold rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap">Điều khoản</Link>
-          <Link href="/contact" className="px-2 sm:px-2.5 py-1.5 text-slate-600 hover:text-blue-600 font-semibold rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap">Liên hệ</Link>
+    <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-5 flex-shrink-0 shadow-sm gap-3">
+      {/* LEFT GROUP: Toggle Sidebar Button + Main Feature Navigation Tabs Aligned LEFT */}
+      <div className="flex items-center space-x-1.5 min-w-0">
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer shadow-2xs flex items-center justify-center shrink-0"
+            title="Hiện thanh thông tin bên trái"
+          >
+            <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
+        {/* Main Feature Navigation Tabs (Desktop/Tablet Header - Hidden on Mobile) */}
+        <nav className="hidden md:flex items-center space-x-1 overflow-hidden [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+          {(["sld", "boq", "history", "library", "panel"] as TabKey[]).map((key) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`px-2.5 py-1.5 text-[12px] sm:text-[12.5px] font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap flex items-center space-x-1 shrink-0 ${
+                activeTab === key
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "text-slate-700 hover:text-slate-900 hover:bg-slate-100 font-semibold"
+              }`}
+            >
+              <span>
+                {{
+                  sld: "📄 SLD Reader",
+                  boq: "📊 Bảng Báo Giá",
+                  history: "📜 Lịch sử bóc tách",
+                  library: "📂 Library",
+                  panel: "🧩 Panel Design",
+                }[key]}
+              </span>
+            </button>
+          ))}
         </nav>
       </div>
 
@@ -86,11 +112,7 @@ export default function Header({
           </a>
         )}
 
-        {/* Language Selection */}
-        <div className="bg-slate-100 rounded-full border border-slate-200 p-0.5 flex text-[10px] font-semibold">
-          <button className="px-2 py-0.5 rounded-full text-slate-400 hover:text-slate-600">EN</button>
-          <button className="px-2 py-0.5 rounded-full bg-blue-600 text-white shadow-sm">VI</button>
-        </div>
+
 
         {/* Notifications */}
         <div className="relative" ref={notifMenuRef}>
@@ -151,7 +173,7 @@ export default function Header({
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={toggleUserMenu}
-            className="flex items-center space-x-2 p-1 rounded-lg hover:bg-slate-100"
+            className="flex items-center space-x-2 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
           >
             <div className="w-7.5 h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
               {userInitial}
@@ -159,16 +181,45 @@ export default function Header({
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50">
-              <div className="px-4 py-2 border-b border-slate-100">
+            <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50">
+              <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
                 <p className="text-xs font-bold text-slate-800">{userFullName}</p>
-                <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+                <p className="text-[10px] text-slate-400 truncate mt-0.5">{userEmail}</p>
               </div>
+
+              {/* Navigation Links inside User Tooltip Dropdown */}
+              <div className="py-1 border-b border-slate-100 text-xs">
+                <Link href="/huong-dan" className="px-4 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2.5 font-medium transition-colors">
+                  <span className="text-sm">📖</span>
+                  <span>Hướng dẫn sử dụng</span>
+                </Link>
+                <Link href="/blog" className="px-4 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2.5 font-medium transition-colors">
+                  <span className="text-sm">📰</span>
+                  <span>Tin tức & Blog</span>
+                </Link>
+                <Link href="/about" className="px-4 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2.5 font-medium transition-colors">
+                  <span className="text-sm">ℹ️</span>
+                  <span>Giới thiệu hệ thống</span>
+                </Link>
+                <Link href="/privacy" className="px-4 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2.5 font-medium transition-colors">
+                  <span className="text-sm">🔒</span>
+                  <span>Chính sách bảo mật</span>
+                </Link>
+                <Link href="/terms" className="px-4 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2.5 font-medium transition-colors">
+                  <span className="text-sm">📜</span>
+                  <span>Điều khoản dịch vụ</span>
+                </Link>
+                <Link href="/contact" className="px-4 py-2 text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2.5 font-medium transition-colors">
+                  <span className="text-sm">📞</span>
+                  <span>Liên hệ hỗ trợ</span>
+                </Link>
+              </div>
+
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-slate-50 flex items-center space-x-2"
+                className="w-full text-left px-4 py-2.5 text-xs text-rose-600 hover:bg-rose-50 font-bold flex items-center space-x-2.5 transition-colors cursor-pointer rounded-b-xl"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 <span>Đăng xuất</span>

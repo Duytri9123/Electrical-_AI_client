@@ -1,6 +1,8 @@
 import { authenticatedBackendFetch, clearSessionCookies, passthrough } from "@/lib/server/backend";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const response = await authenticatedBackendFetch("/users/me");
@@ -11,11 +13,15 @@ export async function GET() {
       }, { status: 401 });
     }
     
+    const resBody = await response.json();
     if (!response.ok) {
-      await clearSessionCookies();
+      return NextResponse.json(resBody, { status: response.status });
     }
-    
-    return passthrough(response);
+    const userData = resBody.data?.user || resBody.data;
+    return NextResponse.json({
+      success: true,
+      data: { user: userData },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Lỗi kết nối máy chủ.";
     return NextResponse.json({

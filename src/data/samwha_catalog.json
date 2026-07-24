@@ -1,0 +1,61 @@
+{
+  "brand": "samwha",
+  "devices": [
+    {
+      "brand": "samwha",
+      "d": 70,
+      "g": 2450000,
+      "h": 90,
+      "icu": 0,
+      "in": 60,
+      "ma": "EOCR-SS-60N",
+      "n": "Rơ le bảo vệ quá dòng Samwha EOCR-SS-60N (0.5-60A)",
+      "p": 3,
+      "series": "EOCR Series",
+      "t": "Relay",
+      "w": 70
+    },
+    {
+      "brand": "samwha",
+      "d": 70,
+      "g": 3850000,
+      "h": 90,
+      "icu": 0,
+      "in": 30,
+      "ma": "EOCR-3DZ-30N",
+      "n": "Rơ le kỹ thuật số đa chức năng Samwha EOCR-3DZ 30N",
+      "p": 3,
+      "series": "EOCR Digital",
+      "t": "Relay",
+      "w": 90
+    },
+    {
+      "brand": "samwha",
+      "d": 120,
+      "g": 1850000,
+      "h": 240,
+      "icu": 0,
+      "in": 15,
+      "ma": "SAMWHA-CAP-15KVAR",
+      "n": "Tụ bù hạ thế Samwha 15kVAr 440V 3P 50Hz",
+      "p": 3,
+      "series": "Tụ bù 3P",
+      "t": "Capacitor",
+      "w": 120
+    },
+    {
+      "brand": "samwha",
+      "d": 120,
+      "g": 2450000,
+      "h": 240,
+      "icu": 0,
+      "in": 25,
+      "ma": "SAMWHA-CAP-25KVAR",
+      "n": "Tụ bù hạ thế Samwha 25kVAr 440V 3P 50Hz",
+      "p": 3,
+      "series": "Tụ bù 3P",
+      "t": "Capacitor",
+      "w": 120
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "brand": "emic",
+  "devices": [
+    {
+      "brand": "emic",
+      "d": 50,
+      "g": 380000,
+      "h": 96,
+      "icu": 0,
+      "in": 5,
+      "ma": "EMIC-AM-96",
+      "n": "Đồng hồ đo dòng điện Ampe kế EMIC 96x96mm",
+      "p": 1,
+      "series": "Đồng hồ tủ",
+      "t": "Meter",
+      "w": 96
+    },
+    {
+      "brand": "emic",
+      "d": 50,
+      "g": 380000,
+      "h": 96,
+      "icu": 0,
+      "in": 500,
+      "ma": "EMIC-VM-96",
+      "n": "Đồng hồ đo điện áp Voltmeter EMIC 96x96mm (0-500V)",
+      "p": 1,
+      "series": "Đồng hồ tủ",
+      "t": "Meter",
+      "w": 96
+    },
+    {
+      "brand": "emic",
+      "d": 45,
+      "g": 185000,
+      "h": 75,
+      "icu": 0,
+      "in": 100,
+      "ma": "CT-EMIC-100/5A",
+      "n": "Biến dòng hạ thế EMIC 100/5A Cấp 0.5",
+      "p": 1,
+      "series": "Biến dòng CT",
+      "t": "CT",
+      "w": 65
+    },
+    {
+      "brand": "emic",
+      "d": 45,
+      "g": 220000,
+      "h": 75,
+      "icu": 0,
+      "in": 200,
+      "ma": "CT-EMIC-200/5A",
+      "n": "Biến dòng hạ thế EMIC 200/5A Cấp 0.5",
+      "p": 1,
+      "series": "Biến dòng CT",
+      "t": "CT",
+      "w": 65
+    },
+    {
+      "brand": "emic",
+      "d": 45,
+      "g": 280000,
+      "h": 75,
+      "icu": 0,
+      "in": 400,
+      "ma": "CT-EMIC-400/5A",
+      "n": "Biến dòng hạ thế EMIC 400/5A Cấp 0.5",
+      "p": 1,
+      "series": "Biến dòng CT",
+      "t": "CT",
+      "w": 65
+    }
+  ]
+}

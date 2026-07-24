@@ -164,20 +164,34 @@ export default function RegisterPage() {
         {/* ── LEFT PANEL ─────────────────────────────── */}
         <div className="reg-panel-left" style={{
           flex: "0 0 42%",
-          background: "linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%)",
+          backgroundImage: "linear-gradient(145deg, rgba(15,23,42,0.88) 0%, rgba(30,58,138,0.85) 50%, rgba(29,78,216,0.82) 100%), url('/Images/electrical_bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           display: "flex", flexDirection: "column",
           padding: "48px 52px", position: "relative", overflow: "hidden",
         }}>
           <FloatingOrbs />
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "52px", position: "relative", zIndex: 1 }}>
-            <img src="/Images/logo.png" alt="Electrical AI" style={{ height: "38px", objectFit: "contain" }} />
-            <span style={{ color: "white", fontWeight: 800, fontSize: "18px", letterSpacing: "0.04em" }}>ELECTRICAL AI</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "48px", position: "relative", zIndex: 1 }}>
+            <img src="/Images/logo.png" alt="Electrical AI" style={{ height: "52px", objectFit: "contain", filter: "drop-shadow(0 0 16px rgba(59,130,246,0.8))" }} />
+            <span style={{
+              background: "linear-gradient(90deg, #ffffff 0%, #93c5fd 50%, #fef08a 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontWeight: 900,
+              fontSize: "24px",
+              letterSpacing: "0.08em"
+            }}>ELECTRICAL AI</span>
           </div>
 
           <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-            <h1 style={{ color: "white", fontSize: "30px", fontWeight: 800, lineHeight: 1.3, margin: "0 0 14px" }}>
-              Tạo tài khoản<br />miễn phí ngay hôm nay
+            <h1 style={{ color: "white", fontSize: "32px", fontWeight: 900, lineHeight: 1.3, margin: "0 0 14px", letterSpacing: "-0.02em" }}>
+              Tạo tài khoản<br />
+              <span style={{
+                background: "linear-gradient(90deg, #38bdf8 0%, #60a5fa 40%, #fbbf24 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent"
+              }}>miễn phí ngay hôm nay⚡</span>
             </h1>
             <p style={{ color: "#93c5fd", fontSize: "14px", lineHeight: 1.7, margin: "0 0 32px" }}>
               Không cần thẻ tín dụng. Bắt đầu phân tích bản vẽ điện ngay sau khi đăng ký.

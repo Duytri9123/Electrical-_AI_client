@@ -7,7 +7,7 @@ interface Device {
   pole: number;
   current: number;
   icu: string;
-  brand: string;
+  brand?: string;
   model: string;
   status: string;
 }

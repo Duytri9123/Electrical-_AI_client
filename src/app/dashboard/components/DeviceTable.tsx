@@ -21,6 +21,8 @@ interface DeviceTableProps {
   onUpdateDevice: (index: number, field: keyof Device, value: any) => void;
   onRemoveDevice: (index: number) => void;
   onAddDevice: () => void;
+  onToggleDiagramView?: () => void;
+  hasUploadedDiagram?: boolean;
 }
 
 export default function DeviceTable({
@@ -28,13 +30,17 @@ export default function DeviceTable({
   onUpdateDevice,
   onRemoveDevice,
   onAddDevice,
+  onToggleDiagramView,
+  hasUploadedDiagram,
 }: DeviceTableProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col flex-1 shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-none overflow-hidden flex flex-col flex-1 shadow-sm">
+
+
       <div className="flex-1 overflow-x-auto">
         <table className="w-full text-left border-collapse text-[11px]">
           <thead>
-            <tr className="bg-slate-50 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-200">
+            <tr className="bg-slate-50/60 text-slate-500 uppercase tracking-wider font-extrabold border-b border-slate-200">
               <th className="p-2 w-8 text-center text-[10px]">#</th>
               <th className="p-2 w-12 text-center text-[10px]">LV</th>
               <th className="p-2 min-w-[120px] text-[10px]">CIRCUIT / LOAD</th>
@@ -70,37 +76,45 @@ export default function DeviceTable({
                 </td>
 
                 {/* Circuit / Load */}
-                <td className="p-2">
-                  <input
-                    type="text"
-                    value={dev.circuit}
+                <td className="p-2 min-w-[150px]">
+                  <textarea
+                    rows={dev.circuit && dev.circuit.length > 20 ? 2 : 1}
+                    value={dev.circuit ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "circuit", e.target.value)}
-                    className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
+                    className="w-full px-1.5 py-0.5 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 resize-none overflow-hidden text-[11px] leading-tight font-medium text-slate-800 break-words"
                   />
                 </td>
 
                 {/* Type Selection */}
                 <td className="p-2">
                   <select
-                    value={dev.type}
+                    value={dev.type ? dev.type.toUpperCase() : "MCB"}
                     onChange={(e) => onUpdateDevice(idx, "type", e.target.value)}
-                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer"
+                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer font-bold text-slate-800"
                   >
-                    <option value="ACB">ACB</option>
-                    <option value="MCCB">MCCB</option>
                     <option value="MCB">MCB</option>
+                    <option value="MCCB">MCCB</option>
+                    <option value="ACB">ACB</option>
                     <option value="RCBO">RCBO</option>
+                    <option value="RCCB">RCCB</option>
+                    <option value="CONTACTOR">CONTACTOR</option>
+                    <option value="TIMER">TIMER</option>
+                    <option value="FUSE">FUSE</option>
+                    <option value="ENCLOSURE">VỎ TỦ</option>
+                    <option value="BUSBAR">THANH CÁI</option>
                     <option value="SPD">SPD</option>
+                    <option value="OTHER">KHÁC</option>
                   </select>
                 </td>
 
                 {/* Poles Selection */}
                 <td className="p-2">
                   <select
-                    value={dev.pole}
+                    value={dev.pole ?? 1}
                     onChange={(e) => onUpdateDevice(idx, "pole", parseInt(e.target.value))}
-                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer"
+                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer font-bold text-slate-700"
                   >
+                    <option value={0}>-</option>
                     <option value={1}>1P</option>
                     <option value={2}>2P</option>
                     <option value={3}>3P</option>
@@ -112,7 +126,7 @@ export default function DeviceTable({
                 <td className="p-2">
                   <input
                     type="number"
-                    value={dev.current}
+                    value={dev.current ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "current", parseInt(e.target.value) || 0)}
                     className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
@@ -122,7 +136,7 @@ export default function DeviceTable({
                 <td className="p-2">
                   <input
                     type="text"
-                    value={dev.icu}
+                    value={dev.icu ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "icu", e.target.value)}
                     className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
@@ -132,7 +146,7 @@ export default function DeviceTable({
                 <td className="p-2">
                   <input
                     type="text"
-                    value={dev.leakage ?? "-"}
+                    value={dev.leakage ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "leakage", e.target.value)}
                     className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
@@ -153,7 +167,7 @@ export default function DeviceTable({
                 <td className="p-2">
                   <input
                     type="number"
-                    value={dev.power ?? 0}
+                    value={dev.power ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "power", parseFloat(e.target.value) || 0)}
                     className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0"
                   />
@@ -180,7 +194,7 @@ export default function DeviceTable({
                 <td className="p-2">
                   <input
                     type="text"
-                    value={dev.model}
+                    value={dev.model ?? ""}
                     onChange={(e) => onUpdateDevice(idx, "model", e.target.value)}
                     className="w-full px-2 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 font-mono text-[10.5px] font-semibold text-slate-700"
                   />
