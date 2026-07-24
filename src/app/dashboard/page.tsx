@@ -100,6 +100,11 @@ export default function DashboardPage() {
   const [modelUsed, setModelUsed] = useState<string | null>(null);
   const [layoutData, setLayoutData] = useState<any>(null);
   const [graphData, setGraphData] = useState<any>(null);
+  // Engineering analysis results from BE
+  const [coordinationResult, setCoordinationResult] = useState<any>(null);
+  const [thermalResult, setThermalResult] = useState<any>(null);
+  const [busbarSpec, setBusbarSpec] = useState<any>(null);
+  const [doorInstruments, setDoorInstruments] = useState<any[]>([]);
 
   // Review Modal states
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -419,6 +424,11 @@ export default function DashboardPage() {
         setGraphData(res.data.data.graph);
         setResponseTime(res.data.data.response_time);
         setModelUsed(res.data.data.model_used);
+        // Engineering analysis results
+        if (res.data.data.coordination) setCoordinationResult(res.data.data.coordination);
+        if (res.data.data.thermal)      setThermalResult(res.data.data.thermal);
+        if (res.data.data.busbar_spec)  setBusbarSpec(res.data.data.busbar_spec);
+        if (res.data.data.door_instruments) setDoorInstruments(res.data.data.door_instruments || []);
         setUploadError(null);
 
         // Refresh history list silently (don't auto-load latest, we have fresh results)
@@ -1240,6 +1250,10 @@ export default function DashboardPage() {
               devices={analysisResult || []}
               layoutData={layoutData}
               graphData={graphData}
+              coordinationResult={coordinationResult}
+              thermalResult={thermalResult}
+              busbarSpec={busbarSpec}
+              doorInstruments={doorInstruments}
             />
           ) : analysisResult && !viewingDiagramImage ? (
             <DeviceTable

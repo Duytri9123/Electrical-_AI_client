@@ -47,6 +47,23 @@ interface PanelDesignProps {
   devices: Device[];
   layoutData: LayoutData | null;
   graphData: any;
+  // Engineering analysis results from BE
+  coordinationResult?: {
+    warnings: string[];
+    errors: string[];
+    summary: string;
+    check_count: number;
+  } | null;
+  thermalResult?: {
+    total_heat_W: number;
+    delta_T_K: number;
+    ventilation_required: boolean;
+    forced_ventilation_required: boolean;
+    fan_spec?: string;
+    summary: string;
+  } | null;
+  busbarSpec?: any | null;
+  doorInstruments?: any[];
 }
 
 interface CabinetParams {
@@ -175,7 +192,15 @@ function Solid3DCube({
   );
 }
 
-export default function PanelDesign({ devices, layoutData, graphData }: PanelDesignProps) {
+export default function PanelDesign({
+  devices,
+  layoutData,
+  graphData,
+  coordinationResult,
+  thermalResult,
+  busbarSpec,
+  doorInstruments,
+}: PanelDesignProps) {
   const [hasDrawing, setHasDrawing] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState<"physical" | "schematic">("physical");
@@ -1414,24 +1439,91 @@ EOF`;
                         </p>
                       </div>
 
-                      <div className="space-y-2 text-[10px] font-mono text-slate-400">
-                        <div className="flex justify-between items-center border-b border-slate-850 pb-1">
-                          <span>Cách điện Busbar:</span>
-                          <span className="text-emerald-500 font-bold">✓ OK</span>
+                      {/* Coordination Result */}
+                      {coordinationResult ? (
+                        <div className="bg-slate-950 border border-slate-800 rounded-lg p-2.5 space-y-1.5">
+                          <div className="font-bold text-[10px] text-amber-400 uppercase tracking-wider">
+                            ⚡ Phối hợp bảo vệ (IEC 60947-2)
+                          </div>
+                          <div className="text-[9px] text-slate-400 font-mono">{coordinationResult.summary}</div>
+                          {coordinationResult.errors && coordinationResult.errors.length > 0 && (
+                            <div className="space-y-0.5">
+                              {coordinationResult.errors.map((err: string, i: number) => (
+                                <div key={i} className="text-[9px] text-red-400 bg-red-950/40 border border-red-900 px-2 py-0.5 rounded font-mono">
+                                  ✗ {err}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {coordinationResult.warnings && coordinationResult.warnings.length > 0 && (
+                            <div className="space-y-0.5">
+                              {coordinationResult.warnings.map((w: string, i: number) => (
+                                <div key={i} className="text-[9px] text-amber-400 bg-amber-950/40 border border-amber-900 px-2 py-0.5 rounded font-mono">
+                                  ⚠ {w}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {(!coordinationResult.errors?.length && !coordinationResult.warnings?.length) && (
+                            <div className="text-[9px] text-emerald-400 font-mono">✓ Tất cả {coordinationResult.check_count} kiểm tra PASS</div>
+                          )}
                         </div>
-                        <div className="flex justify-between items-center border-b border-slate-850 pb-1">
-                          <span>Khoảng cách máng cáp:</span>
-                          <span className="text-emerald-500 font-bold">✓ OK</span>
+                      ) : (
+                        <div className="space-y-2 text-[10px] font-mono text-slate-400">
+                          <div className="flex justify-between items-center border-b border-slate-850 pb-1">
+                            <span>Cách điện Busbar:</span>
+                            <span className="text-emerald-500 font-bold">✓ OK</span>
+                          </div>
+                          <div className="flex justify-between items-center border-b border-slate-850 pb-1">
+                            <span>Khoảng cách máng cáp:</span>
+                            <span className="text-emerald-500 font-bold">✓ OK</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center border-b border-slate-850 pb-1">
-                          <span>Khả năng thoát nhiệt:</span>
-                          <span className="text-emerald-500 font-bold">✓ OK</span>
+                      )}
+
+                      {/* Thermal Result */}
+                      {thermalResult && (
+                        <div className="bg-slate-950 border border-slate-800 rounded-lg p-2.5 space-y-1.5">
+                          <div className="font-bold text-[10px] text-rose-400 uppercase tracking-wider">
+                            🌡 Nhiệt - IEC 61439-1 Annex D
+                          </div>
+                          <div className="text-[9px] text-slate-400 font-mono">{thermalResult.summary}</div>
+                          <div className="grid grid-cols-2 gap-1 text-[9px] font-mono mt-1">
+                            <div className="bg-slate-900 border border-slate-700 rounded p-1">
+                              <div className="text-slate-500">Tổng nhiệt</div>
+                              <div className="text-white font-bold">{thermalResult.total_heat_W}W</div>
+                            </div>
+                            <div className="bg-slate-900 border border-slate-700 rounded p-1">
+                              <div className="text-slate-500">ΔT (nhiệt độ)</div>
+                              <div className={`font-bold ${thermalResult.delta_T_K > 25 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                +{thermalResult.delta_T_K?.toFixed(1)}°K
+                              </div>
+                            </div>
+                          </div>
+                          <div className={`text-[9px] font-mono px-2 py-1 rounded border ${
+                            thermalResult.forced_ventilation_required
+                              ? 'text-red-300 bg-red-950/40 border-red-900'
+                              : 'text-emerald-300 bg-emerald-950/40 border-emerald-900'
+                          }`}>
+                            {thermalResult.forced_ventilation_required
+                              ? `🌀 Quạt cưỡng bức: ${thermalResult.fan_spec || 'Cần chọn quạt'}`
+                              : '✓ Đối lưu tự nhiên đủ'}
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center border-b border-slate-850 pb-1">
-                          <span>Tính toán Isc CB:</span>
-                          <span className="text-emerald-500 font-bold">✓ OK</span>
+                      )}
+
+                      {/* Busbar Spec */}
+                      {busbarSpec && (
+                        <div className="bg-slate-950 border border-slate-800 rounded-lg p-2.5 space-y-1">
+                          <div className="font-bold text-[10px] text-amber-300 uppercase tracking-wider">⚡ Thanh cái</div>
+                          <div className="text-[9px] font-mono text-slate-300">
+                            {busbarSpec.dimensions} — {busbarSpec.cross_section_mm2}mm²
+                          </div>
+                          <div className="text-[9px] font-mono text-slate-500">
+                            Imax: {busbarSpec.Imax_A}A · Phases: {(busbarSpec.phases || []).join(', ')}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
 
