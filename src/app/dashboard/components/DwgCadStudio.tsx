@@ -102,6 +102,7 @@ export default function DwgCadStudio({
   const [dimStyles, setDimStyles] = useState<DwgTableItem[]>([]);
   const [viewports, setViewports] = useState<DwgTableItem[]>([]);
   const [layouts, setLayouts] = useState<DwgTableItem[]>([]);
+  const [drawingSections, setDrawingSections] = useState<{ title: string; x: number; y: number }[]>([]);
   const [versionInfo, setVersionInfo] = useState<DwgVersionInfo | null>(null);
   const [conversionStats, setConversionStats] = useState<DwgConversionStats | null>(null);
   const [thumbnail, setThumbnail] = useState<DwgThumbnailResult | null>(null);
@@ -173,6 +174,7 @@ export default function DwgCadStudio({
         setDimStyles(result.dimStyles);
         setViewports(result.viewports);
         setLayouts(result.layouts);
+        setDrawingSections(result.drawingSections || []);
         setVersionInfo(result.versionInfo);
         setConversionStats(result.stats);
         setThumbnail(result.thumbnail);
@@ -726,34 +728,35 @@ export default function DwgCadStudio({
           </span>
         </div>
 
-        {/* Section View Navigator Overlay */}
+        {/* Dynamic Section View Navigator Overlay */}
         {svgContent && (
-          <div className="absolute top-3 left-48 z-10 hidden lg:flex items-center space-x-1.5 bg-white/95 backdrop-blur-sm p-1.5 rounded-xl border border-slate-200 shadow-md text-xs font-bold">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider px-1">Khu Vực Bản Vẽ:</span>
+          <div className="absolute top-3 left-48 z-10 hidden lg:flex items-center space-x-1.5 bg-white/95 backdrop-blur-sm p-1.5 rounded-xl border border-slate-200 shadow-md text-xs font-bold max-w-[50vw] overflow-x-auto custom-scrollbar">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider px-1 shrink-0">Khu Vực Bản Vẽ:</span>
             <button
               onClick={() => { setZoomLevel(1); setPanPos({ x: 0, y: 0 }); }}
-              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
+              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px] shrink-0"
             >
               Tất Cả (100%)
             </button>
-            <button
-              onClick={() => { setZoomLevel(1.6); setPanPos({ x: 320, y: 80 }); }}
-              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
-            >
-              Mặt Tủ (EL 2 cánh)
-            </button>
-            <button
-              onClick={() => { setZoomLevel(1.6); setPanPos({ x: -220, y: 80 }); }}
-              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
-            >
-              Thanh Gá Tủ
-            </button>
-            <button
-              onClick={() => { setZoomLevel(1.6); setPanPos({ x: -620, y: 80 }); }}
-              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
-            >
-              Panel Lắp Thiết Bị
-            </button>
+            {(drawingSections.length > 0 ? drawingSections : [
+              { title: "Mặt Tủ (EL 2 cánh)", x: -320, y: -80 },
+              { title: "Thanh Gá Tủ", x: 220, y: -80 },
+              { title: "Panel Lắp Thiết Bị", x: 620, y: -80 },
+            ]).map((sec, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setZoomLevel(1.6);
+                  const px = typeof sec.x === "number" && sec.x !== 0 ? -sec.x * 0.4 : (idx === 0 ? 320 : idx === 1 ? -220 : -620);
+                  const py = typeof sec.y === "number" && sec.y !== 0 ? -sec.y * 0.4 : 80;
+                  setPanPos({ x: px, y: py });
+                }}
+                className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px] truncate max-w-[160px] shrink-0"
+                title={sec.title}
+              >
+                {sec.title}
+              </button>
+            ))}
           </div>
         )}
 

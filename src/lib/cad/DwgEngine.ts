@@ -216,6 +216,7 @@ export interface DwgParseResult {
   dimStyles: DwgTableItem[];
   viewports: DwgTableItem[];
   layouts: DwgTableItem[];
+  drawingSections?: { title: string; x: number; y: number }[];
   thumbnail: DwgThumbnailResult | null;
   devices: ExtractedCadEntity[];
   aiAnalysis: DwgAiAnalysisResult;
@@ -344,6 +345,7 @@ export class DwgEngineService {
       const dimStyles = this.extractTableItems(database, 'DIMSTYLE');
       const viewports = this.extractTableItems(database, 'VPORT');
       const layouts = this.extractTableItems(database, 'LAYOUT');
+      const drawingSections = this.extractDrawingSections(database);
 
       // 9. Thumbnail
       let thumbnail: DwgThumbnailResult | null = null;
@@ -379,6 +381,7 @@ export class DwgEngineService {
         dimStyles,
         viewports,
         layouts,
+        drawingSections,
         thumbnail,
         devices,
         aiAnalysis,
@@ -539,6 +542,32 @@ export class DwgEngineService {
     return Object.entries(map).map(([key, val]: [string, any]) => ({
       name: val?.name || key,
     }));
+  }
+
+  /** Trích xuất động các khu vực khung tủ / bản vẽ dựa trên tiêu đề TEXT/MTEXT */
+  private extractDrawingSections(database: any): { title: string; x: number; y: number }[] {
+    if (!database?.entities || !Array.isArray(database.entities)) return [];
+
+    const sectionsMap = new Map<string, { title: string; x: number; y: number }>();
+    const KEYWORDS = [/MẶT/i, /TỦ/i, /PANEL/i, /THANH/i, /SƠ ĐỒ/i, /KHUNG/i, /MẠCH/i, /BẢN VẼ/i, /DB/i, /SECTION/i, /VIEW/i];
+
+    for (const ent of database.entities) {
+      if (ent.type === 'TEXT' || ent.type === 'MTEXT') {
+        const textVal = (ent.text || ent.textString || ent.value || '').trim();
+        const textHeight = ent.height || ent.textHeight || 0;
+
+        if (textVal.length >= 3 && textVal.length <= 45 && (textHeight > 5 || KEYWORDS.some(k => k.test(textVal)))) {
+          const cleanTitle = textVal.replace(/[\r\n\t]+/g, ' ').toUpperCase();
+          if (!sectionsMap.has(cleanTitle)) {
+            const x = ent.insertion_point?.x ?? ent.x ?? 0;
+            const y = ent.insertion_point?.y ?? ent.y ?? 0;
+            sectionsMap.set(cleanTitle, { title: cleanTitle, x, y });
+          }
+        }
+      }
+    }
+
+    return Array.from(sectionsMap.values()).slice(0, 6);
   }
 
   /** Trích xuất thiết bị từ INSERT blocks (attribs), TEXT/MTEXT, MULTILEADER, TABLE */
