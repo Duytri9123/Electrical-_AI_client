@@ -1,4 +1,34 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useState, useRef } from "react";
+import {
+  Zap,
+  UploadCloud,
+  FileText,
+  FileCode2,
+  Layers,
+  Cpu,
+  BarChart3,
+  Download,
+  History,
+  Trash2,
+  Search,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Sparkles,
+  FileSpreadsheet,
+  FolderOpen,
+  Filter,
+  ShieldCheck,
+  Thermometer,
+  Play,
+  ChevronLeft,
+  X,
+  FileOutput,
+  Box,
+} from "lucide-react";
+import type { DwgStudioStateData } from "./DwgCadStudio";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -35,12 +65,13 @@ interface SidebarProps {
   setLibTypeFilter?: (type: string) => void;
   libPoleFilter?: string;
   setLibPoleFilter?: (pole: string) => void;
-  
-  // Panel CAD Controls Props
+
+  // Panel CAD Controls & DWG Studio Data
   panelViewMode?: "sheet" | "cad" | "3d";
   setPanelViewMode?: (mode: "sheet" | "cad" | "3d") => void;
   cadLayers?: any[];
   onToggleLayer?: (layerId: string) => void;
+  dwgStudioData?: DwgStudioStateData | null;
 }
 
 export default function Sidebar({
@@ -80,54 +111,36 @@ export default function Sidebar({
   setLibPoleFilter,
   panelViewMode = "sheet",
   setPanelViewMode,
-  cadLayers = [
-    { id: "cabinet", name: "0_CABINET_FRAME", color: "#00ffff", visible: true },
-    { id: "busbar", name: "1_BUSBAR_RSTNP", color: "#ff00ff", visible: true },
-    { id: "devices", name: "2_DEVICES_EQUIPMENT", color: "#00ff00", visible: true },
-    { id: "cutout", name: "3_CNC_CUTOUTS", color: "#ef4444", visible: true },
-    { id: "dimension", name: "4_DIMENSIONS_COT", color: "#ffff00", visible: true },
-    { id: "text", name: "5_ANNOTATIONS_TEXT", color: "#ffffff", visible: true },
-    { id: "titleblock", name: "6_TITLE_BLOCK_A3", color: "#e2e8f0", visible: true },
-  ],
+  cadLayers = [],
   onToggleLayer,
+  dwgStudioData,
 }: SidebarProps) {
-  const [showImageModal, setShowImageModal] = useState(false);
+  const [panelMainTab, setPanelMainTab] = useState<"devices" | "layers" | "stats" | "export">("devices");
   const [panelFilterSearch, setPanelFilterSearch] = useState("");
-  const [panelMainTab, setPanelMainTab] = useState<"devices" | "management">("devices");
-  const [panelSubTab, setPanelSubTab] = useState<"devices" | "busbar" | "acc" | "door">("devices");
 
-  // Mouse Drag-to-Scroll for Panel Sub-Tabs
-  const subTabScrollRef = React.useRef<HTMLDivElement>(null);
-  const [isSubTabDragging, setIsSubTabDragging] = useState(false);
-  const [subTabStartX, setSubTabStartX] = useState(0);
-  const [subTabScrollLeft, setSubTabScrollLeft] = useState(0);
+  const activeDwgDevices = dwgStudioData?.devices && dwgStudioData.devices.length > 0
+    ? dwgStudioData.devices
+    : analysisResult && analysisResult.length > 0
+    ? analysisResult
+    : [];
 
-  const handleSubTabMouseDown = (e: React.MouseEvent) => {
-    if (!subTabScrollRef.current) return;
-    setIsSubTabDragging(true);
-    setSubTabStartX(e.pageX - subTabScrollRef.current.offsetLeft);
-    setSubTabScrollLeft(subTabScrollRef.current.scrollLeft);
-  };
-  const handleSubTabMouseLeaveOrUp = () => setIsSubTabDragging(false);
-  const handleSubTabMouseMove = (e: React.MouseEvent) => {
-    if (!isSubTabDragging || !subTabScrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - subTabScrollRef.current.offsetLeft;
-    const walk = (x - subTabStartX) * 2;
-    subTabScrollRef.current.scrollLeft = subTabScrollLeft - walk;
-  };
+  const activeDwgLayers = dwgStudioData?.layers && dwgStudioData.layers.length > 0
+    ? dwgStudioData.layers
+    : cadLayers;
 
   return (
     <aside
-      className={`h-full w-84 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-30 transition-all duration-300 select-none font-sans ${
-        sidebarOpen ? "w-84 opacity-100" : "w-0 opacity-0 overflow-hidden pointer-events-none border-none"
+      className={`h-full bg-white flex flex-col flex-shrink-0 z-30 transition-all duration-300 select-none font-sans ${
+        sidebarOpen
+          ? "w-96 opacity-100 border-r border-slate-200"
+          : "w-0 opacity-0 overflow-hidden pointer-events-none border-none border-0 p-0"
       }`}
     >
       {/* BRAND LOGO HEADER AT VERY TOP OF SIDEBAR */}
       <div className="h-14 px-4 border-b border-slate-200 flex items-center justify-between bg-white flex-shrink-0">
         <div className="flex items-center space-x-2.5">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-blue-500/20 font-black text-sm">
-            ⚡
+            <Zap className="w-4 h-4 fill-current" />
           </div>
           <div>
             <h1 className="font-black text-sm text-slate-900 tracking-tight leading-none">
@@ -142,59 +155,155 @@ export default function Sidebar({
         {/* Toggle Collapse Sidebar Button */}
         <button
           onClick={() => setSidebarOpen(false)}
-          className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
           title="Thu gọn sidebar"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+          <ChevronLeft className="w-4 h-4" />
         </button>
       </div>
 
       <div className="p-3 flex-1 flex flex-col space-y-3 overflow-y-auto custom-scrollbar">
-        {/* TAB SLD, HISTORY, BOQ: SIDEBAR UPLOAD & DỰ ÁN ĐÃ BÓC TÁCH */}
+        {/* ============================================================ */}
+        {/* TAB SLD, HISTORY, BOQ: SIDEBAR UPLOAD & DỰ ÁN ĐÃ BÓC TÁCH     */}
+        {/* ============================================================ */}
         {(activeTab === "sld" || activeTab === "history" || activeTab === "boq") && (
           <div className="space-y-3 flex-1 flex flex-col min-h-0">
             {/* Quick Upload Box (Only on SLD tab) */}
             {activeTab === "sld" && (
-              <div className="space-y-2">
-                <button
-                  onClick={handleClickUpload}
-                  disabled={uploading}
-                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:bg-slate-300 text-white font-extrabold rounded-xl shadow-md shadow-blue-500/20 cursor-pointer transition-all text-xs uppercase tracking-wider flex items-center justify-center space-x-1.5"
-                >
-                  <span>☝</span>
-                  <span>{uploading ? "ĐANG TẢI VÀ BÓC TÁCH..." : "UPLOAD DIAGRAM (SLD)"}</span>
-                </button>
-
-                <div
-                  onClick={handleClickUpload}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  className={`border-2 border-dashed rounded-xl p-3 text-center bg-white cursor-pointer transition-all ${
-                    dragOver ? "border-blue-500 bg-blue-50/80 scale-[0.99]" : "border-slate-200/80 hover:border-blue-400 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className="text-xl mb-1">🖼️</div>
-                  <div className="text-[11px] font-bold text-slate-700">Tải sơ đồ điện (Image / PDF)</div>
-                  <p className="text-[9.5px] text-slate-400 mt-0.5 font-medium">Kéo thả file hoặc bấm dán (Ctrl+V)</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,.pdf,.jpg,.jpeg,.png,.webp,.bmp"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
+              <div className="space-y-2 font-sans">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Sơ Đồ Điện SLD
+                  </span>
+                  <span className="text-[9.5px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                    JPG, PNG, WEBP, PDF
+                  </span>
                 </div>
+
+                {/* 1. UPLOADING PROGRESS BAR STATE */}
+                {uploading ? (
+                  <div className="bg-blue-50/90 border border-blue-200 rounded-xl p-3 space-y-2 shadow-xs">
+                    <div className="flex justify-between items-center text-xs font-bold text-blue-900">
+                      <span className="flex items-center space-x-1.5">
+                        <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                        <span>Đang tải sơ đồ lên server...</span>
+                      </span>
+                      <span className="font-mono text-blue-700">{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-blue-200/80 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${Math.max(uploadProgress, 5)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ) : uploadedFile ? (
+                  /* 2. ATTACHED FILE PREVIEW & DETAILS CARD */
+                  <div className="bg-white border border-slate-200 rounded-2xl p-3 space-y-2.5 shadow-xs">
+                    {/* Thumbnail Preview (for Images) */}
+                    {(filePreviewUrl || uploadedFile?.file_url || uploadedFile?.file_path) &&
+                    !(uploadedFile?.file_name || "").toLowerCase().endsWith(".pdf") ? (
+                      <div className="w-full h-36 bg-slate-50 rounded-xl overflow-hidden border border-slate-200 relative flex items-center justify-center group shadow-inner">
+                        <img
+                          src={filePreviewUrl || uploadedFile.file_url || uploadedFile.file_path}
+                          alt="Bản vẽ xem trước"
+                          className="w-full h-full object-contain p-1"
+                        />
+                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-white bg-slate-900/80 px-2 py-1 rounded-lg">
+                            Bản vẽ gốc đã tải
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      /* PDF Card Preview */
+                      <div className="w-full p-3 bg-red-50/90 border border-red-200 rounded-xl flex items-center space-x-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0 font-bold">
+                          <FileText className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div className="truncate flex-1">
+                          <div className="text-xs font-extrabold text-red-900 truncate">
+                            {uploadedFile?.file_name || "Tài liệu SĐNL.pdf"}
+                          </div>
+                          <span className="text-[9.5px] text-red-600 font-semibold">Tài liệu sơ đồ điện PDF</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File info bar */}
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                      <div className="truncate flex-1 pr-2">
+                        <div className="font-extrabold text-slate-800 text-[11px] truncate">
+                          {uploadedFile?.file_name || "Sơ đồ điện"}
+                        </div>
+                        <div className="text-[9.5px] text-slate-400 font-mono">
+                          {uploadedFile?.file_size ? formatSize(uploadedFile.file_size) : "Sẵn sàng phân tích"}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setUploadedFile(null);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                        title="Tải file khác"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Start AI Analysis Button */}
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={analyzing}
+                      className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold rounded-xl shadow-md shadow-blue-500/20 cursor-pointer transition-all text-xs uppercase tracking-wider flex items-center justify-center space-x-2"
+                    >
+                      {analyzing ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4" />
+                      )}
+                      <span>{analyzing ? "ĐANG PHÂN TÍCH AI..." : "BẮT ĐẦU PHÂN TÍCH AI"}</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* 3. BLANK DROP ZONE */
+                  <div
+                    onClick={handleClickUpload}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    className={`border-2 border-dashed rounded-xl p-3.5 text-center bg-white cursor-pointer transition-all ${
+                      dragOver
+                        ? "border-blue-500 bg-blue-50/80 scale-[0.99]"
+                        : "border-slate-200/80 hover:border-blue-400 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <UploadCloud className="w-7 h-7 mx-auto text-blue-600 mb-1" />
+                    <div className="text-[11px] font-bold text-slate-700">
+                      Tải Sơ Đồ Điện (Image / PDF)
+                    </div>
+                    <p className="text-[9.5px] text-slate-400 mt-0.5 font-medium">
+                      Kéo thả file hoặc bấm dán (Ctrl+V)
+                    </p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,.pdf,.jpg,.jpeg,.png,.webp,.bmp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
-            {/* LỊCH SỬ BÓC TÁCH (HISTORY PROJECTS LIST IN SIDEBAR) */}
+            {/* LỊCH SỬ BÓC TÁCH */}
             <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center space-x-1">
-                  <span>📜 Lịch sử bóc tách ({historyProjects.length})</span>
+                <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                  <History className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Lịch Sử Bóc Tách ({historyProjects.length})</span>
                 </span>
                 <span className="text-[9.5px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
                   {loadingHistory ? "Đang tải..." : "Đã đồng bộ"}
@@ -204,8 +313,11 @@ export default function Sidebar({
               <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                 {historyProjects.length === 0 ? (
                   <div className="p-4 text-center text-xs text-slate-400 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
-                    <div>📂 Chưa có dự án lưu trữ</div>
-                    <p className="text-[10px] text-slate-400">Các sơ đồ bóc tách thành công sẽ tự động xuất hiện ở đây.</p>
+                    <FolderOpen className="w-6 h-6 mx-auto text-slate-300 mb-1" />
+                    <div>Chưa có dự án lưu trữ</div>
+                    <p className="text-[10px] text-slate-400">
+                      Các sơ đồ bóc tách thành công sẽ tự động xuất hiện ở đây.
+                    </p>
                   </div>
                 ) : (
                   historyProjects.map((proj: any) => {
@@ -223,9 +335,11 @@ export default function Sidebar({
                         }`}
                       >
                         <div className="flex items-start justify-between">
-                          <div className={`font-extrabold text-xs truncate flex-1 pr-2 ${
-                            isSelected ? "text-white" : "text-slate-800 group-hover:text-blue-600"
-                          }`}>
+                          <div
+                            className={`font-extrabold text-xs truncate flex-1 pr-2 ${
+                              isSelected ? "text-white" : "text-slate-800 group-hover:text-blue-600"
+                            }`}
+                          >
                             {proj.name || `Dự án #${proj.id}`}
                           </div>
                           <button
@@ -233,27 +347,37 @@ export default function Sidebar({
                               e.stopPropagation();
                               onDeleteHistoryProject(proj.id);
                             }}
-                            className={`p-0.5 rounded transition-colors text-xs ${
-                              isSelected ? "text-blue-200 hover:text-white" : "text-slate-300 hover:text-rose-600 opacity-0 group-hover:opacity-100"
+                            className={`p-1 rounded transition-colors text-xs ${
+                              isSelected
+                                ? "text-blue-200 hover:text-white"
+                                : "text-slate-300 hover:text-rose-600 opacity-0 group-hover:opacity-100"
                             }`}
                             title="Xóa dự án khỏi lịch sử"
                           >
-                            🗑️
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
-                        <div className={`flex items-center justify-between mt-2 pt-1.5 border-t text-[10px] ${
-                          isSelected ? "border-blue-500/60" : "border-slate-100/80"
-                        }`}>
-                          <span className={`font-bold px-2 py-0.5 rounded border ${
-                            isSelected
-                              ? "bg-white/20 text-white border-white/30"
-                              : "text-emerald-700 bg-emerald-50 border-emerald-200"
-                          }`}>
-                            {devCount} thiết bị
+                        <div
+                          className={`flex items-center justify-between mt-2 pt-1.5 border-t text-[10px] ${
+                            isSelected ? "border-blue-500/60" : "border-slate-100/80"
+                          }`}
+                        >
+                          <span
+                            className={`font-bold px-2 py-0.5 rounded border ${
+                              isSelected
+                                ? "bg-white/20 text-white border-white/30"
+                                : "text-emerald-700 bg-emerald-50 border-emerald-200"
+                            }`}
+                          >
+                            {devCount} Thiết Bị
                           </span>
-                          <span className={`font-medium ${isSelected ? "text-blue-100" : "text-slate-400"}`}>
-                            {proj.created_at ? new Date(proj.created_at).toLocaleDateString("vi-VN") : "Hôm nay"}
+                          <span
+                            className={`font-medium ${isSelected ? "text-blue-100" : "text-slate-400"}`}
+                          >
+                            {proj.created_at
+                              ? new Date(proj.created_at).toLocaleDateString("vi-VN")
+                              : "Hôm nay"}
                           </span>
                         </div>
                       </div>
@@ -265,15 +389,16 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* TAB LIBRARY SIDEBAR: SEARCH & FILTERS REDESIGNED */}
+        {/* ============================================================ */}
+        {/* TAB LIBRARY SIDEBAR: SEARCH & FILTERS                        */}
+        {/* ============================================================ */}
         {activeTab === "library" && (
           <div className="space-y-3 font-sans">
             <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs space-y-3">
-              {/* Filter Section Header */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
-                  <span className="text-blue-600">🔍</span>
-                  <span>LỌC THƯ VIỆN THIẾT BỊ</span>
+                  <Filter className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Lọc Thư Viện Thiết Bị</span>
                 </span>
                 {(selectedBrand !== "LS" || libSearchTerm || libTypeFilter !== "all" || libPoleFilter !== "all") && (
                   <button
@@ -285,16 +410,18 @@ export default function Sidebar({
                     }}
                     className="text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md border border-blue-200 transition-colors cursor-pointer flex items-center space-x-1"
                   >
-                    <span>🔄</span>
+                    <RefreshCw className="w-3 h-3" />
                     <span>Xóa lọc</span>
                   </button>
                 )}
               </div>
 
-              {/* Brand Selection Dropdown */}
+              {/* Brand Selection */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Thương hiệu hãng</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    Thương hiệu hãng
+                  </label>
                   <span className="text-[9.5px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
                     {selectedBrand}
                   </span>
@@ -302,7 +429,7 @@ export default function Sidebar({
                 <select
                   value={selectedBrand}
                   onChange={(e) => setSelectedBrand(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-900 text-xs font-bold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer transition-all"
+                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-900 text-xs font-bold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer transition-all"
                 >
                   <option value="LS">LS Industrial Systems</option>
                   <option value="ABB">ABB Electric</option>
@@ -316,35 +443,39 @@ export default function Sidebar({
 
               {/* Search Model Input */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm Mã SP / Tên</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Tìm kiếm Mã SP / Tên
+                </label>
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Nhập mã SP (vd: ABN103c...)"
                     value={libSearchTerm}
                     onChange={(e) => setLibSearchTerm && setLibSearchTerm(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs py-2 pl-2.5 pr-8 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs py-2 pl-2.5 pr-8 rounded-xl focus:outline-none focus:border-blue-500 font-mono transition-all"
                   />
                   {libSearchTerm ? (
                     <button
                       onClick={() => setLibSearchTerm && setLibSearchTerm("")}
                       className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
                     >
-                      ✕
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   ) : (
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+                    <Search className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   )}
                 </div>
               </div>
 
               {/* Type Filter */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Loại thiết bị</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Loại thiết bị
+                </label>
                 <select
                   value={libTypeFilter}
                   onChange={(e) => setLibTypeFilter && setLibTypeFilter(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer transition-all"
+                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer transition-all"
                 >
                   <option value="all">Tất cả loại thiết bị</option>
                   <option value="MCCB">Aptomat MCCB</option>
@@ -359,11 +490,13 @@ export default function Sidebar({
 
               {/* Pole Filter */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Số cực (Pole)</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Số cực (Pole)
+                </label>
                 <select
                   value={libPoleFilter}
                   onChange={(e) => setLibPoleFilter && setLibPoleFilter(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer transition-all"
+                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer transition-all"
                 >
                   <option value="all">Tất cả số cực</option>
                   <option value="1">1 Pha (1P)</option>
@@ -376,194 +509,168 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* TAB 4: PANEL DESIGN MAIN SIDEBAR */}
+        {/* ============================================================ */}
+        {/* TAB 4: DWG CAD STUDIO EXPANDED SIDEBAR (ALL INFO INTEGRATED)  */}
+        {/* ============================================================ */}
         {activeTab === "panel" && (
           <div className="space-y-3 flex-1 flex flex-col font-sans min-h-0">
-            {/* 2 MAIN TOP TABS: 🔌 Thiết bị & ⚙️ Quản lý */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/80 font-bold text-xs shrink-0">
+            {/* FILE DWG/DXF SELECTION & ANALYZE TRIGGER SECTION */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Bản Vẽ CAD AutoCAD
+                </span>
+                <span className="text-[9.5px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                  DWG, DXF
+                </span>
+              </div>
+
+              {/* File Info Box */}
+              {dwgStudioData?.fileName ? (
+                <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-2 truncate pr-2">
+                      <FileCode2 className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span className="font-bold text-slate-800 truncate">
+                        {dwgStudioData.fileName}
+                      </span>
+                    </div>
+                    <span className="text-[9.5px] bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-mono shrink-0">
+                      {(dwgStudioData.fileSize / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+
+                  {/* Explicit Analyze Trigger Button */}
+                  {dwgStudioData.onStartParse && (
+                    <button
+                      onClick={() => dwgStudioData.onStartParse()}
+                      disabled={dwgStudioData.loading}
+                      className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-500/20 cursor-pointer transition-all flex items-center justify-center space-x-2"
+                    >
+                      {dwgStudioData.loading ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Play className="w-4 h-4 fill-current" />
+                      )}
+                      <span>
+                        {dwgStudioData.loading
+                          ? "ĐANG PHÂN TÍCH..."
+                          : "BẮT ĐẦU PHÂN TÍCH DWG"}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleClickUpload()}
+                    className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    <span>Chọn File DWG</span>
+                  </button>
+                  {dwgStudioData?.onLoadSample && (
+                    <button
+                      onClick={dwgStudioData.onLoadSample}
+                      className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center space-x-1 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Mẫu</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* SIDEBAR MAIN DWG TABS */}
+            <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/80 font-bold text-[11px] shrink-0">
               <button
                 onClick={() => setPanelMainTab("devices")}
-                className={`py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center justify-center space-x-1.5 ${
+                className={`py-1.5 px-1 rounded-lg cursor-pointer transition-all flex items-center justify-center space-x-1 ${
                   panelMainTab === "devices"
                     ? "bg-blue-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                 }`}
               >
-                <span>🔌</span>
-                <span>Thiết bị</span>
+                <Cpu className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Thiết bị</span>
               </button>
               <button
-                onClick={() => setPanelMainTab("management")}
-                className={`py-2 px-3 rounded-lg cursor-pointer transition-all flex items-center justify-center space-x-1.5 ${
-                  panelMainTab === "management"
+                onClick={() => setPanelMainTab("layers")}
+                className={`py-1.5 px-1 rounded-lg cursor-pointer transition-all flex items-center justify-center space-x-1 ${
+                  panelMainTab === "layers"
                     ? "bg-blue-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                 }`}
               >
-                <span>⚙️</span>
-                <span>Quản lý</span>
+                <Layers className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Layers</span>
+              </button>
+              <button
+                onClick={() => setPanelMainTab("stats")}
+                className={`py-1.5 px-1 rounded-lg cursor-pointer transition-all flex items-center justify-center space-x-1 ${
+                  panelMainTab === "stats"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Chỉ số</span>
+              </button>
+              <button
+                onClick={() => setPanelMainTab("export")}
+                className={`py-1.5 px-1 rounded-lg cursor-pointer transition-all flex items-center justify-center space-x-1 ${
+                  panelMainTab === "export"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+                }`}
+              >
+                <Download className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Xuất</span>
               </button>
             </div>
 
-            {/* TAB 1: 🔌 THIẾT BỊ (DEVICES & COMPONENTS LIST) */}
+            {/* SUB TAB CONTENT 1: THIẾT BỊ */}
             {panelMainTab === "devices" && (
               <div className="space-y-2.5 flex-1 flex flex-col min-h-0">
-                {/* Search & Import Controls Bar */}
+                {/* Search & Sync Controls Bar */}
                 <div className="space-y-1.5 shrink-0">
                   <div className="flex items-center justify-between space-x-1.5">
                     <div className="relative flex-1">
                       <input
                         type="text"
-                        placeholder="🔍 Tìm linh kiện / mã SP..."
+                        placeholder="Tìm linh kiện / mã SP..."
                         value={panelFilterSearch}
                         onChange={(e) => setPanelFilterSearch(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs py-1.5 pl-2.5 pr-7 rounded-lg focus:outline-none focus:border-blue-500 font-sans"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs py-1.5 pl-7 pr-7 rounded-lg focus:outline-none focus:border-blue-500 font-sans"
                       />
+                      <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
                       {panelFilterSearch && (
                         <button
                           onClick={() => setPanelFilterSearch("")}
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
                         >
-                          ✕
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
-                    <label className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold rounded-lg text-[10.5px] cursor-pointer shrink-0 transition-colors flex items-center space-x-1">
-                      <span>📥</span>
-                      <span>Import</span>
-                      <input
-                        type="file"
-                        accept=".json,.csv"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (evt) => {
-                              try {
-                                const parsed = JSON.parse(evt.target?.result as string);
-                                if (Array.isArray(parsed)) {
-                                  alert(`Đã nạp thành công ${parsed.length} thiết bị từ file!`);
-                                }
-                              } catch {
-                                alert("Đã nhận file linh kiện!");
-                              }
-                            };
-                            reader.readAsText(file);
-                          }
-                        }}
-                        className="hidden"
-                      />
-                    </label>
+
+                    {dwgStudioData?.onSyncBoq && activeDwgDevices.length > 0 && (
+                      <button
+                        onClick={dwgStudioData.onSyncBoq}
+                        className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10.5px] cursor-pointer shrink-0 transition-colors flex items-center space-x-1 shadow-xs"
+                      >
+                        <FileSpreadsheet className="w-3.5 h-3.5" />
+                        <span>Đồng bộ BOQ</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Sub-tab Category Buttons (SWIPER SMOOTH HORIZONTAL SCROLL & MOUSE DRAG-TO-SCROLL) */}
-                <div
-                  ref={subTabScrollRef}
-                  onMouseDown={handleSubTabMouseDown}
-                  onMouseLeave={handleSubTabMouseLeaveOrUp}
-                  onMouseUp={handleSubTabMouseLeaveOrUp}
-                  onMouseMove={handleSubTabMouseMove}
-                  className="flex items-center space-x-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 overflow-x-auto whitespace-nowrap text-[11px] font-bold shrink-0 custom-scrollbar scrollbar-none py-1.5 select-none cursor-grab active:cursor-grabbing"
-                >
-                  <button
-                    onClick={() => setPanelSubTab("devices")}
-                    className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
-                      panelSubTab === "devices"
-                        ? "bg-white text-blue-700 shadow-xs border border-slate-200/60 font-black"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
-                    }`}
-                  >
-                    <span>🔌</span>
-                    <span>Thiết bị</span>
-                  </button>
-                  <button
-                    onClick={() => setPanelSubTab("busbar")}
-                    className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
-                      panelSubTab === "busbar"
-                        ? "bg-white text-amber-700 shadow-xs border border-slate-200/60 font-black"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
-                    }`}
-                  >
-                    <span>⚡</span>
-                    <span>Busbar</span>
-                  </button>
-                  <button
-                    onClick={() => setPanelSubTab("acc")}
-                    className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
-                      panelSubTab === "acc"
-                        ? "bg-white text-emerald-700 shadow-xs border border-slate-200/60 font-black"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
-                    }`}
-                  >
-                    <span>🧩</span>
-                    <span>Phụ kiện</span>
-                  </button>
-                  <button
-                    onClick={() => setPanelSubTab("door")}
-                    className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
-                      panelSubTab === "door"
-                        ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
-                    }`}
-                  >
-                    <span>🚪</span>
-                    <span>Mặt cánh</span>
-                  </button>
-                </div>
-
-                {/* Draggable Component List Area with REAL Category Filtering & Fallback Data */}
+                {/* Component List Area */}
                 <div className="flex-1 overflow-y-auto space-y-2 w-full custom-scrollbar pr-1">
                   {(() => {
-                    const rawList = (() => {
-                      if (panelSubTab === "busbar") {
-                        const filtered = (analysisResult || []).filter((d: any) =>
-                          ["BUSBAR", "COPPER", "BAR"].some((k) => (d.type || "").toUpperCase().includes(k))
-                        );
-                        return filtered.length > 0
-                          ? filtered
-                          : [
-                              { id: "bb_r", circuit: "BUSBAR-R Phase", type: "BUSBAR", brand: "LS BUSBAR", model: "Cu 40x5mm R-Phase", current: 630 },
-                              { id: "bb_s", circuit: "BUSBAR-S Phase", type: "BUSBAR", brand: "LS BUSBAR", model: "Cu 40x5mm S-Phase", current: 630 },
-                              { id: "bb_t", circuit: "BUSBAR-T Phase", type: "BUSBAR", brand: "LS BUSBAR", model: "Cu 40x5mm T-Phase", current: 630 },
-                              { id: "bb_n", circuit: "BUSBAR-N Neutral", type: "BUSBAR", brand: "LS BUSBAR", model: "Cu 30x4mm N-Phase", current: 400 },
-                              { id: "bb_pe", circuit: "BUSBAR-PE Earth", type: "BUSBAR", brand: "LS BUSBAR", model: "Cu 25x3mm PE Ground", current: 250 },
-                            ];
-                      }
-                      if (panelSubTab === "acc") {
-                        const filtered = (analysisResult || []).filter((d: any) =>
-                          ["DIN_RAIL", "DUCT", "TERMINAL", "FUSE", "INSULATOR", "ACC"].some((k) => (d.type || "").toUpperCase().includes(k))
-                        );
-                        return filtered.length > 0
-                          ? filtered
-                          : [
-                              { id: "acc_din", circuit: "DIN RAIL 35MM", type: "ACC", brand: "LS ACC", model: "Thanh Ray Nhôm 35mm (L=2M)" },
-                              { id: "acc_duct", circuit: "WIRING DUCT 40x60", type: "ACC", brand: "LS ACC", model: "Máng Luồn Dây Nhựa 40x60mm" },
-                              { id: "acc_term", circuit: "TERMINAL BLOCK 2.5", type: "ACC", brand: "LS ACC", model: "Cầu Đấu Dây 2.5mm² 10P" },
-                              { id: "acc_ins", circuit: "BUSBAR INSULATOR", type: "ACC", brand: "LS ACC", model: "Sứ Cách Điện Busbar Support" },
-                            ];
-                      }
-                      if (panelSubTab === "door") {
-                        const filtered = (analysisResult || []).filter((d: any) =>
-                          ["VOLT", "AMP", "LAMP", "SWITCH", "METER", "DOOR"].some((k) => (d.type || "").toUpperCase().includes(k))
-                        );
-                        return filtered.length > 0
-                          ? filtered
-                          : [
-                              { id: "door_vmeter", circuit: "VOLTMETER 0-500V", type: "METER", brand: "EMIC", model: "Đồng hồ Volt 72x72mm 0-500V" },
-                              { id: "door_ameter", circuit: "AMMETER 0-100A", type: "METER", brand: "EMIC", model: "Đồng hồ Ampere 72x72mm 0-100A" },
-                              { id: "door_lamp", circuit: "PILOT LAMP R-S-T", type: "LAMP", brand: "LS LAMP", model: "Đèn Báo Báo Pha LED 220V (Bộ 3 cái)" },
-                              { id: "door_sw", circuit: "VOLT SELECTOR SW", type: "SWITCH", brand: "LS SW", model: "Công Tắc Xoay Voltmeter 7 Vị Trí" },
-                            ];
-                      }
-                      return analysisResult && analysisResult.length > 0 ? analysisResult : [
-                        { id: "dev_main", circuit: "MAIN CB 40A 3P", type: "MCCB", brand: "LS Electric", model: "ABN103c 3P 40A 10kA", current: 40 },
-                        { id: "dev_mcb1", circuit: "MCB NHÁNH L1", type: "MCB", brand: "LS Electric", model: "BKN 1P 16A 6kA", current: 16 },
-                        { id: "dev_mcb2", circuit: "MCB NHÁNH L2", type: "MCB", brand: "LS Electric", model: "BKN 1P 16A 6kA", current: 16 },
-                      ];
-                    })();
-
-                    const filteredList = rawList.filter((item: any) => {
+                    const filteredList = activeDwgDevices.filter((item: any) => {
                       if (!panelFilterSearch) return true;
                       const q = panelFilterSearch.toLowerCase();
                       return (
@@ -576,9 +683,12 @@ export default function Sidebar({
 
                     if (filteredList.length === 0) {
                       return (
-                        <div className="p-4 text-center text-xs text-slate-400 italic bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
-                          <div>🔍 Không tìm thấy linh kiện phù hợp</div>
-                          <p className="text-[10px] text-slate-400">Thử nhập từ khóa khác hoặc bấm Import linh kiện.</p>
+                        <div className="p-4 text-center text-xs text-slate-400 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+                          <Search className="w-6 h-6 mx-auto text-slate-300 mb-1" />
+                          <div>Chưa có thiết bị bóc tách</div>
+                          <p className="text-[10px] text-slate-400">
+                            Nạp bản vẽ DWG và bấm Bắt Đầu Phân Tích để trích xuất thiết bị.
+                          </p>
                         </div>
                       );
                     }
@@ -586,15 +696,11 @@ export default function Sidebar({
                     return filteredList.map((dev: any, idx: number) => (
                       <div
                         key={dev.id || idx}
-                        draggable={true}
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData("application/json", JSON.stringify(dev));
-                        }}
-                        className="p-2.5 bg-white hover:bg-blue-50/70 border border-slate-200/80 hover:border-blue-400 rounded-xl flex justify-between items-center text-xs cursor-grab active:cursor-grabbing transition-all shadow-2xs group"
+                        className="p-2.5 bg-white hover:bg-blue-50/70 border border-slate-200/80 hover:border-blue-400 rounded-xl flex justify-between items-center text-xs transition-all shadow-2xs group"
                       >
                         <div className="truncate flex-1 pr-2">
                           <div className="font-bold text-slate-800 text-[11px] truncate group-hover:text-blue-600">
-                            {dev.circuit || `Thiết bị #${idx + 1}`}
+                            {dev.circuit || dev.name || `Thiết bị #${idx + 1}`}
                           </div>
                           <div className="text-[10px] text-slate-500 font-sans mt-0.5 flex items-center space-x-1">
                             <span className="px-1 py-0.2 bg-slate-100 text-slate-700 rounded font-bold text-[8.5px] border border-slate-200 shrink-0">
@@ -615,129 +721,205 @@ export default function Sidebar({
               </div>
             )}
 
-            {/* TAB 2: ⚙️ QUẢN LÝ (CAD VIEW MODES, LAYERS & CABINET HISTORY) */}
-            {panelMainTab === "management" && (
-              <div className="space-y-3 flex-1 flex flex-col min-h-0 overflow-y-auto custom-scrollbar pr-1">
-                {/* View Mode Selection Buttons */}
-                <div className="bg-slate-900 text-white p-3 rounded-2xl border border-slate-800 shadow-sm space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-cyan-400 tracking-wider uppercase flex items-center space-x-1">
-                      <span>⚡ CHẾ ĐỘ XEM CAD</span>
-                    </span>
-                    <span className="text-[9px] font-bold px-2 py-0.5 bg-cyan-600 text-white rounded-full">
-                      v2.0
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-1 pt-1">
-                    <button
-                      onClick={() => setPanelViewMode && setPanelViewMode("sheet")}
-                      className={`py-1.5 px-1 rounded-lg text-[10px] font-black text-center transition-all cursor-pointer ${
-                        panelViewMode === "sheet"
-                          ? "bg-cyan-600 text-white shadow"
-                          : "bg-slate-800 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      📄 A3 Sheet
-                    </button>
-                    <button
-                      onClick={() => setPanelViewMode && setPanelViewMode("cad")}
-                      className={`py-1.5 px-1 rounded-lg text-[10px] font-black text-center transition-all cursor-pointer ${
-                        panelViewMode === "cad"
-                          ? "bg-cyan-600 text-white shadow"
-                          : "bg-slate-800 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      📐 2D Canvas
-                    </button>
-                    <button
-                      onClick={() => setPanelViewMode && setPanelViewMode("3d")}
-                      className={`py-1.5 px-1 rounded-lg text-[10px] font-black text-center transition-all cursor-pointer ${
-                        panelViewMode === "3d"
-                          ? "bg-emerald-600 text-white shadow"
-                          : "bg-slate-800 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      🧊 3D View
-                    </button>
-                  </div>
+            {/* SUB TAB CONTENT 2: LAYERS MANAGEMENT */}
+            {panelMainTab === "layers" && (
+              <div className="space-y-2 flex-1 flex flex-col min-h-0">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    Quản Lý Lớp Layer CAD ({activeDwgLayers.length})
+                  </span>
                 </div>
 
-                {/* AutoCAD Layers Toggle Section in Main Sidebar */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 text-white space-y-2">
-                  <div className="text-[11px] font-black text-cyan-300 uppercase tracking-wider border-b border-slate-800 pb-1.5 flex items-center justify-between">
-                    <span>📑 QUẢN LÝ LỚP LAYER</span>
-                    <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
-                      {cadLayers.length} Layers
-                    </span>
-                  </div>
-                  <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                    {cadLayers.map((lyr) => (
-                      <div
-                        key={lyr.id}
-                        onClick={() => onToggleLayer && onToggleLayer(lyr.id)}
-                        className={`flex items-center justify-between p-1.5 rounded-lg text-[10.5px] cursor-pointer transition-all border ${
-                          lyr.visible
-                            ? "bg-slate-950 border-cyan-900 text-slate-200 hover:border-cyan-500"
-                            : "bg-slate-950/40 border-slate-900 text-slate-600 line-through"
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2 truncate">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: lyr.color }}
-                          ></span>
-                          <span className="truncate font-semibold">{lyr.name}</span>
-                        </div>
-                        <span className="text-xs">{lyr.visible ? "👁️" : "🙈"}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* QUẢN LÝ CÁC TỦ LỊCH SỬ (CABINETS HISTORY MANAGEMENT) */}
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-3 text-slate-800 space-y-2">
-                  <div className="text-[11px] font-black text-slate-700 uppercase tracking-wider border-b border-slate-100 pb-1.5 flex items-center justify-between">
-                    <span>📜 LỊCH SỬ TỦ ĐIỆN CAD ({historyProjects.length})</span>
-                    <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-bold">
-                      History
-                    </span>
-                  </div>
-                  <div className="space-y-1.5 max-h-44 overflow-y-auto custom-scrollbar pr-1">
-                    {historyProjects.length === 0 ? (
-                      <div className="p-3 text-center text-xs text-slate-400 italic">
-                        Chưa có lịch sử tủ điện.
-                      </div>
-                    ) : (
-                      historyProjects.map((proj: any) => {
-                        const isSelected = selectedProjectId === proj.id;
-                        return (
-                          <div
-                            key={proj.id}
-                            onClick={() => onSelectHistoryProject(proj)}
-                            className={`p-2 rounded-xl text-xs border cursor-pointer transition-all flex items-center justify-between ${
-                              isSelected
-                                ? "bg-blue-600 text-white border-blue-600 font-bold shadow-xs"
-                                : "bg-slate-50 hover:bg-blue-50/60 border-slate-200 text-slate-700"
-                            }`}
-                          >
-                            <div className="truncate flex-1 pr-1.5">
-                              <div className="truncate font-bold text-[11px]">
-                                {proj.name || `Tủ #${proj.id}`}
-                              </div>
-                              <div className={`text-[9.5px] ${isSelected ? "text-blue-100" : "text-slate-400"}`}>
-                                {proj.created_at ? new Date(proj.created_at).toLocaleDateString("vi-VN") : "Gần đây"}
-                              </div>
-                            </div>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                              isSelected ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            }`}>
-                              Nạp
-                            </span>
+                <div className="flex-1 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+                  {activeDwgLayers.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-400 bg-slate-50 border border-slate-200/80 rounded-xl">
+                      Chưa có thông tin layer. Hãy chọn file DWG/DXF.
+                    </div>
+                  ) : (
+                    activeDwgLayers.map((lyr: any, idx: number) => {
+                      const layerName = lyr.name || `Layer_${idx}`;
+                      const isVisible = lyr.visible !== false;
+                      return (
+                        <div
+                          key={lyr.id || layerName}
+                          onClick={() => {
+                            if (dwgStudioData?.onToggleLayer) dwgStudioData.onToggleLayer(layerName);
+                            else if (onToggleLayer) onToggleLayer(layerName);
+                          }}
+                          className={`flex items-center justify-between p-2 rounded-xl text-[11px] cursor-pointer transition-all border ${
+                            isVisible
+                              ? "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
+                              : "bg-slate-100/50 border-slate-100 text-slate-400 line-through"
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2 truncate">
+                            <span
+                              className="w-3 h-3 rounded-full shrink-0 shadow-xs"
+                              style={{
+                                backgroundColor:
+                                  typeof lyr.color === "number"
+                                    ? `hsl(${(lyr.color * 30) % 360}, 70%, 50%)`
+                                    : lyr.color || "#3b82f6",
+                              }}
+                            ></span>
+                            <span className="truncate font-semibold">{layerName}</span>
                           </div>
-                        );
-                      })
+
+                          <div className="flex items-center space-x-1.5 shrink-0">
+                            {lyr.entityCount !== undefined && (
+                              <span className="text-[9px] bg-white border border-slate-200 px-1.5 py-0.2 rounded font-mono text-slate-500">
+                                {lyr.entityCount}
+                              </span>
+                            )}
+                            {isVisible ? (
+                              <Eye className="w-3.5 h-3.5 text-blue-600" />
+                            ) : (
+                              <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* SUB TAB CONTENT 3: STATS & AI ENGINEERING SPECS */}
+            {panelMainTab === "stats" && (
+              <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-1 text-xs">
+                {/* CAD File Metadata */}
+                <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
+                  <div className="font-extrabold text-slate-800 border-b border-slate-100 pb-1 flex justify-between items-center">
+                    <span>Thông Số File CAD</span>
+                    <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-mono font-bold">
+                      {dwgStudioData?.versionInfo?.hdr || "DWG"}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-slate-600 text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Phiên bản AutoCAD:</span>
+                      <span className="font-bold">{dwgStudioData?.versionInfo?.version || "Standard DWG"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Tổng thực thể:</span>
+                      <span className="font-mono font-bold text-blue-600">
+                        {dwgStudioData?.entityStats?.reduce((s, e) => s + e.count, 0) || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Số khối Block:</span>
+                      <span className="font-mono font-bold">{dwgStudioData?.blocks?.length || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Engineering Analysis Summary */}
+                {dwgStudioData?.aiAnalysis ? (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 space-y-2">
+                    <div className="font-extrabold text-blue-800 flex items-center space-x-1.5 border-b border-blue-100 pb-1">
+                      <Sparkles className="w-4 h-4 text-blue-600" />
+                      <span>Kết Quả Phân Tích Kỹ Thuật AI</span>
+                    </div>
+
+                    {/* Busbar spec */}
+                    {dwgStudioData.aiAnalysis.busbarSpec && (
+                      <div className="bg-white p-2 rounded-lg border border-blue-100 text-[11px] space-y-1">
+                        <div className="font-bold text-amber-700 flex items-center space-x-1">
+                          <Zap className="w-3 h-3 text-amber-500 fill-current" />
+                          <span>Tính Toán Thanh Cái (Busbar):</span>
+                        </div>
+                        <div className="text-slate-600 font-mono font-semibold">
+                          Quy cách: {dwgStudioData.aiAnalysis.busbarSpec.recommendedSize}
+                        </div>
+                      </div>
                     )}
+
+                    {/* Thermal check */}
+                    {dwgStudioData.aiAnalysis.thermalAnalysis && (
+                      <div className="bg-white p-2 rounded-lg border border-blue-100 text-[11px] space-y-1">
+                        <div className="font-bold text-rose-700 flex items-center space-x-1">
+                          <Thermometer className="w-3 h-3 text-rose-500" />
+                          <span>Tính Tỏa Nhiệt Tủ:</span>
+                        </div>
+                        <div className="text-slate-600">
+                          Công suất tỏa nhiệt: <b>{dwgStudioData.aiAnalysis.thermalAnalysis.totalPowerLossWatts}W</b> ({dwgStudioData.aiAnalysis.thermalAnalysis.recommendation})
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Protection selectivty */}
+                    {dwgStudioData.aiAnalysis.protectionCoordination && (
+                      <div className="bg-white p-2 rounded-lg border border-blue-100 text-[11px] space-y-1">
+                        <div className="font-bold text-emerald-700 flex items-center space-x-1">
+                          <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                          <span>Phối hợp bảo vệ (Selectivity):</span>
+                        </div>
+                        <div className="text-slate-600">
+                          {dwgStudioData.aiAnalysis.protectionCoordination.summary}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-3 text-center text-slate-400 bg-slate-50 border border-slate-200 rounded-xl">
+                    Chạy phân tích DWG để hiển thị tính toán kỹ thuật AI.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SUB TAB CONTENT 4: EXPORT OPTIONS */}
+            {panelMainTab === "export" && (
+              <div className="space-y-3 flex-1 font-sans">
+                <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3">
+                  <h3 className="font-extrabold text-xs text-slate-800 flex items-center space-x-1.5 border-b border-slate-100 pb-2">
+                    <Download className="w-4 h-4 text-blue-600" />
+                    <span>Xuất File Sơ Đồ & Dữ Liệu</span>
+                  </h3>
+
+                  <div className="space-y-2">
+                    <button
+                      onClick={dwgStudioData?.onDownloadSvg}
+                      disabled={!dwgStudioData?.svgContent}
+                      className="w-full py-2.5 px-3 bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 rounded-xl font-bold text-xs transition-all flex items-center justify-between cursor-pointer disabled:opacity-40"
+                    >
+                      <span className="flex items-center space-x-2">
+                        <Download className="w-4 h-4" />
+                        <span>Xuất File Bản Vẽ Vector (.SVG)</span>
+                      </span>
+                      <span className="text-[10px] bg-white px-2 py-0.5 rounded border border-violet-200 font-mono">
+                        Vector
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={dwgStudioData?.onDownloadDxf}
+                      disabled={!dwgStudioData?.rawArrayBuffer}
+                      className="w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl font-bold text-xs transition-all flex items-center justify-between cursor-pointer disabled:opacity-40"
+                    >
+                      <span className="flex items-center space-x-2">
+                        <FileOutput className="w-4 h-4" />
+                        <span>Chuyển Đổi & Xuất File (.DXF)</span>
+                      </span>
+                      <span className="text-[10px] bg-white px-2 py-0.5 rounded border border-amber-200 font-mono">
+                        AutoCAD
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={dwgStudioData?.onSyncBoq}
+                      disabled={!activeDwgDevices.length}
+                      className="w-full py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition-all flex items-center justify-between cursor-pointer disabled:opacity-40"
+                    >
+                      <span className="flex items-center space-x-2">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>Xuất Bảng Báo Giá (BOQ Excel)</span>
+                      </span>
+                      <span className="text-[10px] bg-white px-2 py-0.5 rounded border border-emerald-200 font-mono">
+                        {activeDwgDevices.length} Thiết bị
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>

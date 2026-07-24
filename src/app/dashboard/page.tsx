@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
+import { UnifiedDeviceProvider } from "./context/UnifiedDeviceContext";
 
 import lsCatalogData from "@/data/ls_catalog.json";
 import abbCatalogData from "@/data/abb_catalog.json";
@@ -15,12 +16,12 @@ import emicCatalogData from "@/data/emic_catalog.json";
 import samwhaCatalogData from "@/data/samwha_catalog.json";
 import accessoriesCatalogData from "@/data/accessories_catalog.json";
 
-// Import split components
+import { Image as ImageIcon, Sparkles, FileText, Plus, Search, LayoutGrid, FileSpreadsheet, Cpu, Zap, UploadCloud, RefreshCw, BookOpen, FolderOpen, CheckCircle, Clock, Trash2, Eye } from "lucide-react";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import DeviceTable from "./components/DeviceTable";
 import ReviewModal from "./components/ReviewModal";
-import PanelDesign from "./components/PanelDesign";
+import DwgCadStudio from "./components/DwgCadStudio";
 import BoqQuotationTable from "./components/BoqQuotationTable";
 
 type TabKey = "sld" | "boq" | "history" | "library" | "panel";
@@ -62,6 +63,7 @@ interface NotificationItem {
   created_at: string;
 }
 
+// Unified API client — single instance for all backend calls
 const api = axios.create({ baseURL: "/api/proxy" });
 api.interceptors.response.use(
   (response) => response,
@@ -123,6 +125,18 @@ export default function DashboardPage() {
   const [libSearchTerm, setLibSearchTerm] = useState("");
   const [libTypeFilter, setLibTypeFilter] = useState("all");
   const [libPoleFilter, setLibPoleFilter] = useState("all");
+
+  // DWG Studio shared state — Sidebar and DwgCadStudio both use these
+  const [dwgLayers, setDwgLayers] = useState<any[]>([]);
+  const [dwgStudioData, setDwgStudioData] = useState<any | null>(null);
+
+  const handleDwgLayersChange = useCallback((layers: any[]) => {
+    setDwgLayers(layers);
+  }, []);
+
+  const handleDwgStudioStateChange = useCallback((data: any) => {
+    setDwgStudioData(data);
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -335,7 +349,7 @@ export default function DashboardPage() {
           file_path: d.file_url,
           file_type: d.file_url?.endsWith('.pdf') ? 'pdf' : 'image',
           file_name: d.file_name,
-          file_size: 0,
+          file_size: file.size,
           project_id: pid,
           version_id: d.version?.id ?? 0,
         });
@@ -905,6 +919,18 @@ export default function DashboardPage() {
         setLibTypeFilter={setLibTypeFilter}
         libPoleFilter={libPoleFilter}
         setLibPoleFilter={setLibPoleFilter}
+        cadLayers={dwgLayers.length > 0 ? dwgLayers.map((l, i) => ({
+          id: l.name || `layer_${i}`,
+          name: l.name,
+          color: typeof l.color === 'number' ? `hsl(${(l.color * 30) % 360}, 70%, 50%)` : l.color,
+          visible: l.visible !== false,
+        })) : undefined}
+        onToggleLayer={(layerId) => {
+          setDwgLayers(prev => prev.map(l => 
+            l.name === layerId ? { ...l, visible: !l.visible } : l
+          ));
+        }}
+        dwgStudioData={dwgStudioData}
       />
 
       {/* RIGHT CONTENT */}
@@ -947,11 +973,11 @@ export default function DashboardPage() {
             >
               <span>
                 {{
-                  sld: "📄 SLD Reader",
-                  boq: "📊 Bảng Báo Giá",
-                  history: "📜 Lịch sử bóc tách",
-                  library: "📂 Library",
-                  panel: "🧩 Panel Design",
+                  sld: "SLD Reader",
+                  boq: "Bảng Báo Giá",
+                  history: "Lịch sử bóc tách",
+                  library: "Thư viện thiết bị",
+                  panel: "Studio Bản Vẽ DWG",
                 }[key]}
               </span>
             </button>
@@ -1012,44 +1038,44 @@ export default function DashboardPage() {
 
           {/* Action buttons - ONLY FOR SLD TAB */}
           {activeTab === "sld" && (
-            <div className="flex items-center gap-2 justify-start flex-wrap">
+            <div className="flex items-center gap-2 justify-start flex-wrap font-sans">
               <button
                 onClick={handleAddRow}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-xs font-bold text-slate-700 shadow-2xs transition-all cursor-pointer"
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-700 shadow-2xs transition-all cursor-pointer"
               >
-                <span>➕</span>
+                <Plus className="w-3.5 h-3.5 text-blue-600" />
                 <span>Thêm dòng</span>
               </button>
               {uploadedFile && (
                 <button
                   onClick={() => setViewingDiagramImage(!viewingDiagramImage)}
-                  className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-xs font-bold text-slate-700 shadow-2xs transition-all cursor-pointer"
+                  className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold text-slate-700 shadow-2xs transition-all cursor-pointer"
                 >
-                  <span>🖼️</span>
+                  <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
                   <span>{viewingDiagramImage ? "Xem bảng thiết bị" : "Xem bản vẽ gốc"}</span>
                 </button>
               )}
               <button
                 onClick={() => setShowReviewModal(true)}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-amber-50/80 hover:bg-amber-100/80 border border-amber-300 rounded-lg text-xs font-bold text-amber-800 shadow-2xs transition-all cursor-pointer"
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-amber-50/90 hover:bg-amber-100/90 border border-amber-300/80 rounded-xl text-xs font-bold text-amber-800 shadow-2xs transition-all cursor-pointer"
               >
-                <span>🔍</span>
+                <Search className="w-3.5 h-3.5 text-amber-600" />
                 <span>Duyệt linh kiện</span>
               </button>
               <button
                 onClick={() => setActiveTab("panel")}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-lg text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
               >
-                <span>🧩</span>
-                <span>Thiết kế tủ (Layout)</span>
+                <LayoutGrid className="w-3.5 h-3.5 text-white" />
+                <span>Studio Bản Vẽ DWG</span>
               </button>
               {(analysisResult && analysisResult.length > 0) && (
                 <button
                   onClick={() => setActiveTab("boq")}
-                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 border border-blue-600 rounded-lg text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
+                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 border border-blue-600 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
                   title="Báo giá tự động dựa trên các thiết bị đã bóc tách"
                 >
-                  <span>📊</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-white" />
                   <span>Tạo Báo Giá</span>
                 </button>
               )}
@@ -1058,9 +1084,15 @@ export default function DashboardPage() {
 
           {/* Response time info - ONLY FOR SLD TAB */}
           {activeTab === "sld" && responseTime !== null && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-xs flex justify-between items-center shadow-sm">
-              <span>🤖 AI Model used: <b className="font-mono">{modelUsed}</b></span>
-              <span>⚡ API Execution latency: <b>{responseTime}ms</b></span>
+            <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-blue-800 text-xs flex justify-between items-center shadow-2xs font-sans">
+              <span className="flex items-center space-x-1.5">
+                <Cpu className="w-4 h-4 text-blue-600" />
+                <span>Model AI: <b className="font-mono text-blue-900">{modelUsed}</b></span>
+              </span>
+              <span className="flex items-center space-x-1.5">
+                <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <span>Thời gian phản hồi: <b>{responseTime}ms</b></span>
+              </span>
             </div>
           )}
 
@@ -1086,19 +1118,23 @@ export default function DashboardPage() {
                       if (res.data?.success) setHistoryProjects(res.data.data);
                     } finally { setLoadingHistory(false); }
                   }}
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors cursor-pointer flex items-center space-x-1.5"
                 >
-                  🔄 Làm mới
+                  <RefreshCw className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Làm mới</span>
                 </button>
               </div>
 
               {loadingHistory ? (
-                <div className="py-12 text-center text-slate-400 font-medium">⏳ Đang tải danh sách lịch sử dự án...</div>
+                <div className="py-12 text-center text-slate-400 font-medium flex items-center justify-center space-x-2">
+                  <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+                  <span>Đang tải danh sách lịch sử dự án...</span>
+                </div>
               ) : historyProjects.length === 0 ? (
                 <div className="py-12 text-center space-y-2">
-                  <div className="text-4xl">📁</div>
+                  <FolderOpen className="w-10 h-10 mx-auto text-slate-300" />
                   <div className="text-sm font-semibold text-slate-700">Chưa có dự án nào được phân tích</div>
-                  <p className="text-xs text-slate-400">Hãy nhấn <b>UPLOAD DIAGRAM</b> ở thanh bên trái để bắt đầu bóc tách bản vẽ đầu tiên.</p>
+                  <p className="text-xs text-slate-400">Hãy nạp file sơ đồ ở thanh bên trái để bắt đầu bóc tách bản vẽ đầu tiên.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -1128,8 +1164,18 @@ export default function DashboardPage() {
                               {devCount} thiết bị
                             </td>
                             <td className="p-3 text-center">
-                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-bold text-[10px]">
-                                {latestVer?.status === 'completed' ? '✅ Hoàn thành' : '⏳ Đang xử lý'}
+                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-bold text-[10px] inline-flex items-center space-x-1">
+                                {latestVer?.status === 'completed' ? (
+                                  <>
+                                    <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                    <span>Hoàn thành</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clock className="w-3 h-3 text-amber-600" />
+                                    <span>Đang xử lý</span>
+                                  </>
+                                )}
                               </span>
                             </td>
                             <td className="p-3 text-slate-500">
@@ -1144,16 +1190,18 @@ export default function DashboardPage() {
                                     if (latestVer.graph) setGraphData(latestVer.graph);
                                     setActiveTab("sld");
                                   }}
-                                  className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-[11px] shadow-sm transition-colors cursor-pointer"
+                                  className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded text-[11px] shadow-sm transition-colors cursor-pointer inline-flex items-center space-x-1"
                                 >
-                                  👁️ Xem Bóc Tách
+                                  <Eye className="w-3.5 h-3.5" />
+                                  <span>Xem Bóc Tách</span>
                                 </button>
                               )}
                               <button
                                 onClick={() => handleDeleteProject(proj.id)}
-                                className="px-2 py-1.5 bg-white border border-red-200 hover:border-red-400 hover:bg-red-50 text-red-600 font-bold rounded text-[11px] shadow-sm transition-colors cursor-pointer"
+                                className="px-2 py-1.5 bg-white border border-red-200 hover:border-red-400 hover:bg-red-50 text-red-600 font-bold rounded text-[11px] shadow-sm transition-colors cursor-pointer inline-flex items-center space-x-1"
                               >
-                                🗑️ Xóa
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Xóa</span>
                               </button>
                             </td>
                           </tr>
@@ -1165,37 +1213,51 @@ export default function DashboardPage() {
               )}
             </div>
           ) : activeTab === "library" ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-150 pb-3">
-                <div>
-                  <h2 className="text-base font-extrabold text-slate-800 flex items-center space-x-2">
-                    <span>📂 Thư viện thiết bị chính hãng {selectedBrand}</span>
-                    <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">
-                      {currentCatalogData.devices.length} mã sản phẩm chính hãng
-                    </span>
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Cơ sở dữ liệu thông số kỹ thuật 3D (R x C x S), vị trí lỗ Busbar, bắt vít, số cực và đơn giá catalog VND
-                  </p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4 font-sans">
+              {/* Header Bar */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/80 flex items-center justify-center font-bold shrink-0 shadow-2xs">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                        THƯ VIỆN THIẾT BỊ CHÍNH HÃNG — {selectedBrand}
+                      </h2>
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                        {currentCatalogData.devices.filter((dev: any) => {
+                          const term = libSearchTerm.toLowerCase();
+                          const matchSearch = !term || (dev.ma && dev.ma.toLowerCase().includes(term)) || (dev.n && dev.n.toLowerCase().includes(term)) || (dev.series && dev.series.toLowerCase().includes(term));
+                          const matchType = libTypeFilter === "all" || dev.t === libTypeFilter;
+                          const matchPole = libPoleFilter === "all" || String(dev.p) === libPoleFilter;
+                          return matchSearch && matchType && matchPole;
+                        }).length} mã sản phẩm chính hãng
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                      Cơ sở dữ liệu thông số kỹ thuật 3D (R x C x S mm), số cực (P), dòng định mức (In A) & đơn giá catalog.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Devices Catalog Table (Only this table is rounded-none) */}
-              <div className="overflow-x-auto border border-slate-200 rounded-none max-h-[600px] overflow-y-auto">
+              {/* Devices Catalog Table */}
+              <div className="overflow-x-auto border border-slate-200/80 rounded-xl max-h-[calc(100vh-230px)] min-h-[400px] overflow-y-auto custom-scrollbar">
                 <table className="w-full text-left text-xs border-collapse font-sans">
-                  <thead className="sticky top-0 z-10 shadow-sm">
-                    <tr className="bg-slate-900 text-slate-200 font-bold uppercase text-[10px] tracking-wider">
-                      <th className="p-3"># Mã SP (Model)</th>
-                      <th className="p-3">Tên sản phẩm mô tả</th>
-                      <th className="p-3 text-center">Loại</th>
-                      <th className="p-3 text-center">Số Cực</th>
-                      <th className="p-3 text-center">In (Ampere)</th>
-                      <th className="p-3 text-center">Icu (kA)</th>
-                      <th className="p-3 text-center">Kích thước W x H x D (mm)</th>
-                      <th className="p-3 text-right">Đơn giá Catalog (VNĐ)</th>
+                  <thead className="sticky top-0 z-10 shadow-2xs">
+                    <tr className="bg-slate-100/90 backdrop-blur-xs text-slate-700 font-black uppercase text-[10px] tracking-wider border-b border-slate-200">
+                      <th className="p-3">MÃ SP (MODEL)</th>
+                      <th className="p-3">TÊN SẢN PHẨM MÔ TẢ</th>
+                      <th className="p-3 text-center">LOẠI</th>
+                      <th className="p-3 text-center">SỐ CỰC</th>
+                      <th className="p-3 text-center">IN (AMPERE)</th>
+                      <th className="p-3 text-center">ICU (KA)</th>
+                      <th className="p-3 text-center">KÍCH THƯỚC W x H x D (MM)</th>
+                      <th className="p-3 text-right">ĐƠN GIÁ CATALOG (VNĐ)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 text-slate-700 font-mono text-[11px]">
+                  <tbody className="divide-y divide-slate-150 text-slate-700 text-[11px]">
                     {currentCatalogData.devices
                       .filter((dev: any) => {
                         const term = libSearchTerm.toLowerCase();
@@ -1206,20 +1268,20 @@ export default function DashboardPage() {
                       })
                       .map((dev: any, idx: number) => (
                         <tr key={idx} className="hover:bg-blue-50/60 transition-colors">
-                          <td className="p-3 font-bold text-blue-700">{dev.ma}</td>
-                          <td className="p-3 font-sans font-medium text-slate-800">{dev.n}</td>
+                          <td className="p-3 font-mono font-bold text-blue-700">{dev.ma}</td>
+                          <td className="p-3 font-medium text-slate-800">{dev.n}</td>
                           <td className="p-3 text-center">
-                            <span className={`px-2 py-0.5 rounded font-extrabold text-[9.5px] ${
-                              dev.t === "MCCB" ? "bg-amber-100 text-amber-800 border border-amber-300" : dev.t === "ELCB" ? "bg-rose-100 text-rose-800 border border-rose-300" : dev.t === "Contactor" ? "bg-purple-100 text-purple-800 border border-purple-300" : "bg-blue-100 text-blue-800 border border-blue-300"
+                            <span className={`px-2 py-0.5 rounded-md font-extrabold text-[9.5px] ${
+                              dev.t === "MCCB" ? "bg-amber-50 text-amber-800 border border-amber-200" : dev.t === "ELCB" ? "bg-rose-50 text-rose-800 border border-rose-200" : dev.t === "Contactor" ? "bg-purple-50 text-purple-800 border border-purple-200" : "bg-blue-50 text-blue-800 border border-blue-200"
                             }`}>
                               {dev.t}
                             </span>
                           </td>
-                          <td className="p-3 text-center font-bold">{dev.p}P</td>
-                          <td className="p-3 text-center font-bold text-emerald-600">{dev.in}A</td>
-                          <td className="p-3 text-center font-bold text-slate-500">{dev.icu ? `${dev.icu}kA` : "-"}</td>
-                          <td className="p-3 text-center font-bold text-slate-600">{dev.w} x {dev.h} x {dev.d}</td>
-                          <td className="p-3 text-right font-extrabold text-slate-900">
+                          <td className="p-3 text-center font-bold text-slate-700">{dev.p}P</td>
+                          <td className="p-3 text-center font-bold text-emerald-600 font-mono">{dev.in}A</td>
+                          <td className="p-3 text-center font-bold text-slate-500 font-mono">{dev.icu ? `${dev.icu}kA` : "-"}</td>
+                          <td className="p-3 text-center font-bold text-slate-600 font-mono">{dev.w} x {dev.h} x {dev.d}</td>
+                          <td className="p-3 text-right font-extrabold text-slate-900 font-mono">
                             {dev.g ? `${dev.g.toLocaleString('vi-VN')} đ` : "Liên hệ"}
                           </td>
                         </tr>
@@ -1229,32 +1291,103 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : analyzing ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-16 space-y-6">
-              <div className="relative w-20 h-20 flex items-center justify-center">
-                <svg className="animate-spin w-20 h-20 text-emerald-600" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" />
-                  <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <div className="absolute text-2xl animate-pulse">📋</div>
-              </div>
-              <div className="text-center space-y-3">
-                <h3 className="text-sm font-bold text-slate-700 tracking-wider">SERVER is analyzing...</h3>
-                <div className="w-56 bg-slate-200 h-1.5 rounded-full overflow-hidden mx-auto mt-1 relative">
-                  <div className="bg-emerald-650 h-full rounded-full absolute left-0 top-0 animate-[pulse_1s_infinite] w-3/4" style={{ backgroundColor: '#10b981' }}></div>
+            <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 font-sans min-h-[450px]">
+              <div className="bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-3xl p-8 sm:p-10 max-w-md w-full text-center space-y-6 shadow-xl shadow-blue-500/5 relative overflow-hidden">
+                {/* Glowing Background Accent */}
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                {/* Animated High-Tech Spinner */}
+                <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-blue-500/10 animate-ping"></div>
+                  <svg className="animate-spin w-24 h-24 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-15" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" />
+                    <path
+                      className="opacity-90"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  <div className="absolute w-14 h-14 bg-white rounded-2xl shadow-md border border-slate-100 flex items-center justify-center">
+                    <Sparkles className="w-7 h-7 text-blue-600 animate-pulse" />
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 font-medium">Matching to database...</p>
+
+                {/* Status Text */}
+                <div className="space-y-2 relative z-10">
+                  <h3 className="text-base font-black bg-gradient-to-r from-blue-700 via-indigo-600 to-cyan-600 bg-clip-text text-transparent tracking-tight">
+                    HỆ THỐNG AI ĐANG PHÂN TÍCH...
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed px-2">
+                    Đang quét cấu trúc sơ đồ, trích xuất mã thiết bị, dòng định mức (A) và đối chiếu bảng giá vật tư...
+                  </p>
+                </div>
+
+                {/* Shimmer Progress Bar */}
+                <div className="space-y-2">
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden relative border border-slate-200/60 p-0.5">
+                    <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 h-full rounded-full animate-[pulse_1.5s_infinite] w-4/5 shadow-xs"></div>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                    <span>Đang xử lý thị giác máy tính</span>
+                    <span className="text-blue-600 font-mono">AI Processing...</span>
+                  </div>
+                </div>
+
+                {/* Processing Steps Badges */}
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+                  <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-2 text-center">
+                    <Cpu className="w-3.5 h-3.5 mx-auto text-blue-600 mb-1 animate-spin" />
+                    <span className="text-[9.5px] font-bold text-blue-900 block">Trích xuất sơ đồ</span>
+                  </div>
+                  <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-2 text-center">
+                    <Zap className="w-3.5 h-3.5 mx-auto text-indigo-600 mb-1" />
+                    <span className="text-[9.5px] font-bold text-indigo-900 block">Bóc tách thông số</span>
+                  </div>
+                  <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2 text-center">
+                    <FileSpreadsheet className="w-3.5 h-3.5 mx-auto text-emerald-600 mb-1" />
+                    <span className="text-[9.5px] font-bold text-emerald-900 block">Đối chiếu vật tư</span>
+                  </div>
+                </div>
               </div>
             </div>
           ) : activeTab === "panel" ? (
-            <PanelDesign
-              devices={analysisResult || []}
-              layoutData={layoutData}
-              graphData={graphData}
-              coordinationResult={coordinationResult}
-              thermalResult={thermalResult}
-              busbarSpec={busbarSpec}
-              doorInstruments={doorInstruments}
-            />
+            <div className="w-full h-full flex-1 overflow-hidden">
+              <DwgCadStudio
+                onSyncDevicesToBoq={async (devs) => {
+                  // 1. Set devices immediately for fast UI update
+                  setAnalysisResult(devs as any);
+                  setActiveTab("boq");
+                  
+                  // 2. Call backend engineering analysis for catalog match + thermal + protection
+                  try {
+                    const res = await api.post("/projects/analyze-dwg-devices", {
+                      devices: (devs as any[]).map(d => ({
+                        type: d.type,
+                        brand: d.brand || 'LS',
+                        pole: d.pole || 3,
+                        current: d.current || 0,
+                        name: d.name || '',
+                        circuit: d.circuit || '',
+                        model: d.model || '',
+                        icu: d.icu || null,
+                      })),
+                    });
+                    if (res.data?.success && res.data?.data) {
+                      const eng = res.data.data;
+                      if (eng.devices) setAnalysisResult(eng.devices as any);
+                      if (eng.coordination) setCoordinationResult(eng.coordination);
+                      if (eng.thermal) setThermalResult(eng.thermal);
+                      if (eng.busbar) setBusbarSpec(eng.busbar);
+                    }
+                  } catch (err) {
+                    console.warn("Backend DWG analysis unavailable, using local data only", err);
+                  }
+                }}
+                onLayersChange={handleDwgLayersChange}
+                onStudioStateChange={handleDwgStudioStateChange}
+              />
+            </div>
           ) : analysisResult && !viewingDiagramImage ? (
             <DeviceTable
               devices={analysisResult}
@@ -1265,57 +1398,85 @@ export default function DashboardPage() {
               onToggleDiagramView={() => setViewingDiagramImage(true)}
             />
           ) : uploadedFile ? (
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl p-4 sm:p-6 shadow-sm flex flex-col space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 pb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">🖼️</span>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900">
-                      HÌNH ẢNH BẢN VẼ ĐÃ NHẬP: <span className="text-blue-700 font-mono">{uploadedFile.file_name}</span>
-                    </h3>
-                    <p className="text-xs text-slate-500">Hình ảnh bản vẽ sơ đồ đơn tuyến SLD đã được tải vào thành công.</p>
+            <div className="flex-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex flex-col space-y-3 overflow-hidden font-sans min-h-[500px]">
+              {/* Header Toolbar */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100 shrink-0">
+                <div className="flex items-center space-x-3 truncate">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/80 flex items-center justify-center font-bold shrink-0 shadow-2xs">
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <div className="truncate">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider truncate">
+                        SƠ ĐỒ ĐƠN TUYẾN SLD
+                      </h3>
+                      <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 truncate">
+                        {uploadedFile.file_name}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                      Bản vẽ đã được nạp thành công. Nhấn "Bắt Đầu Phân Tích AI" để tự động bóc tách danh mục vật tư.
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+
+                <div className="flex items-center space-x-2 shrink-0">
                   {analysisResult && (
                     <button
                       onClick={() => setViewingDiagramImage(false)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-lg text-xs shadow-sm transition-all cursor-pointer flex items-center space-x-1.5"
+                      className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center space-x-1.5 border border-slate-200"
                     >
-                      <span>📋</span>
-                      <span>Quay Lại Bảng Bóc Tách ({analysisResult.length} thiết bị)</span>
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span>Xem Bảng Bóc Tách ({analysisResult.length})</span>
                     </button>
                   )}
                   <button
                     onClick={handleAnalyze}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs shadow-md transition-all cursor-pointer flex items-center space-x-2"
+                    disabled={analyzing}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center space-x-2 uppercase tracking-wider"
                   >
-                    <span>🔍 BẮT ĐẦU BÓC TÁCH (ANALYZE)</span>
+                    {analyzing ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    <span>{analyzing ? "ĐANG PHÂN TÍCH..." : "BẮT ĐẦU PHÂN TÍCH AI"}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Large Image Diagram Viewer Box */}
-              <div className="flex-1 w-full min-h-[350px] bg-slate-900 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center p-3 shadow-inner">
+              {/* Clean Single Image Viewer Box */}
+              <div className="flex-1 w-full bg-slate-50/70 rounded-xl border border-slate-200/80 overflow-hidden relative flex items-center justify-center p-3 shadow-inner">
                 {filePreviewUrl || uploadedFile.file_url || uploadedFile.file_path ? (
                   <img
                     src={filePreviewUrl || uploadedFile.file_url || uploadedFile.file_path}
                     alt="Bản vẽ sơ đồ SLD đã tải vào"
-                    className="max-h-[600px] max-w-full object-contain rounded shadow-2xl"
+                    className="max-h-full max-w-full object-contain rounded-lg shadow-md border border-slate-200/90 bg-white"
                   />
                 ) : (
-                  <div className="text-center text-slate-400 py-12">
-                    <span className="text-4xl block mb-2">📄</span>
-                    <span className="text-xs font-bold text-slate-300">{uploadedFile.file_name}</span>
+                  <div className="text-center text-slate-400 py-12 space-y-2">
+                    <FileText className="w-10 h-10 mx-auto text-slate-300" />
+                    <div className="text-xs font-bold text-slate-600">{uploadedFile.file_name}</div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="flex-1 border border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-center space-y-2">
-              <div className="text-3xl text-slate-300">📋</div>
-              <h3 className="text-sm font-bold text-slate-400">Bắt đầu bằng cách tải lên hoặc dán bản vẽ (Ctrl + V)</h3>
-              <p className="text-[12px] text-slate-400">Tải file JPG, PNG, PDF hoặc bấm <b>Ctrl + V</b> để dán ảnh trực tiếp từ clipboard.</p>
+            <div className="flex-1 border-2 border-dashed border-slate-200 rounded-2xl bg-white flex flex-col items-center justify-center p-8 text-center space-y-3 font-sans min-h-[400px]">
+              <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs border border-blue-100">
+                <UploadCloud className="w-8 h-8" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-extrabold text-slate-800">Tải Lên Hoặc Dán Sơ Đồ Điện (Ctrl + V)</h3>
+                <p className="text-xs text-slate-400">Hỗ trợ các định dạng file: <b>JPG, PNG, WEBP, PDF</b></p>
+              </div>
+              <button
+                onClick={handleClickUpload}
+                className="px-4.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center space-x-2 cursor-pointer"
+              >
+                <UploadCloud className="w-4 h-4" />
+                <span>Chọn File Sơ Đồ Điện</span>
+              </button>
             </div>
           )}
         </main>
@@ -1332,6 +1493,7 @@ export default function DashboardPage() {
           onUpdateDevice={handleUpdateDevice}
           confirmedMap={confirmedMap}
           onToggleConfirm={handleToggleConfirmDevice}
+          diagramImageUrl={filePreviewUrl}
         />
       )}
 

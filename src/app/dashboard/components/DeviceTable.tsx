@@ -43,16 +43,16 @@ export default function DeviceTable({
             <tr className="bg-slate-50/60 text-slate-500 uppercase tracking-wider font-extrabold border-b border-slate-200">
               <th className="p-2 w-8 text-center text-[10px]">#</th>
               <th className="p-2 w-12 text-center text-[10px]">LV</th>
-              <th className="p-2 min-w-[120px] text-[10px]">CIRCUIT / LOAD</th>
-              <th className="p-2 w-20 text-[10px]">TYPE</th>
+              <th className="p-2 min-w-[160px] text-[10px]">CIRCUIT / LOAD</th>
+              <th className="p-2 w-28 min-w-[110px] text-[10px]">TYPE</th>
               <th className="p-2 w-16 text-[10px]">POLES</th>
               <th className="p-2 w-20 text-[10px]">IN (A)</th>
-              <th className="p-2 w-16 text-[10px]">ICU (kA)</th>
-              <th className="p-2 w-16 text-[10px]">IΔ (mA)</th>
-              <th className="p-2 min-w-[80px] text-[10px]">CABLE</th>
+              <th className="p-2 w-20 text-[10px]">ICU (kA)</th>
+              <th className="p-2 w-20 text-[10px]">IΔ (mA)</th>
+              <th className="p-2 min-w-[160px] text-[10px]">CABLE</th>
               <th className="p-2 w-16 text-[10px]">P (kW)</th>
-              <th className="p-2 w-16 text-center text-[10px]">MATCH</th>
-              <th className="p-2 min-w-[150px] text-[10px]">MATCHED MODEL</th>
+              <th className="p-2 w-20 text-center text-[10px]">MATCH</th>
+              <th className="p-2 min-w-[240px] text-[10px]">MATCHED MODEL</th>
               <th className="p-2 w-10 text-center text-[10px]"></th>
             </tr>
           </thead>
@@ -86,11 +86,11 @@ export default function DeviceTable({
                 </td>
 
                 {/* Type Selection */}
-                <td className="p-2">
+                <td className="p-2 w-28 min-w-[110px]">
                   <select
                     value={dev.type ? dev.type.toUpperCase() : "MCB"}
                     onChange={(e) => onUpdateDevice(idx, "type", e.target.value)}
-                    className="w-full px-1.5 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer font-bold text-slate-800"
+                    className="w-full px-1 py-1 bg-transparent border-none focus:bg-slate-50 focus:outline-none focus:ring-0 cursor-pointer font-bold text-slate-800 text-[10.5px]"
                   >
                     <option value="MCB">MCB</option>
                     <option value="MCCB">MCCB</option>

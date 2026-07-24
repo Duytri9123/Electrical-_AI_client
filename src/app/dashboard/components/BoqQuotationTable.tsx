@@ -862,10 +862,10 @@ export default function BoqQuotationTable({
 
       {/* ── MODAL 1: CẤU HÌNH THÔNG TIN BÁO GIÁ & LOGO CÔNG TY ──────────────────────────── */}
       {showQuotationInfoModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
-          <div className="bg-white border border-slate-300 rounded-none shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col my-auto">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col my-auto">
             {/* Modal Header */}
-            <div className="bg-slate-900 text-white p-4 px-6 flex justify-between items-center border-b border-slate-700 rounded-none">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 px-6 flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <span className="text-xl">📋</span>
                 <h3 className="font-extrabold text-sm uppercase tracking-wide">
