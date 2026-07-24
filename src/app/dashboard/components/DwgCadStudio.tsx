@@ -456,9 +456,9 @@ export default function DwgCadStudio({
     onStudioStateChangeRef.current = onStudioStateChange;
   }, [onStudioStateChange]);
 
-  // Auto-generate dynamic CAD SVG Diagram when devices are provided from SLD
+  // Auto-generate dynamic CAD SVG Diagram when devices are provided OR when tab is active
   useEffect(() => {
-    if (devicesProp && devicesProp.length > 0 && !pendingFile && !rawArrayBuffer && !svgContent) {
+    if (devicesProp && devicesProp.length > 0) {
       const generated = generateDynamicCadSvg(devicesProp, projectName || "DB FACADE 12F");
       setSvgContent(generated.svg);
       setLayers(generated.layers);
@@ -469,9 +469,31 @@ export default function DwgCadStudio({
       setAiAnalysis(generated.ai);
       setFileName(`${(projectName || "Project").replace(/\s+/g, "_")}_CAD.dwg`);
       setStatusType("success");
-      setStatusMessage(`Đã tự động tạo sơ đồ & bố trí tủ CAD 2D từ ${devicesProp.length} thiết bị SLD!`);
+      setStatusMessage(`Đã tự động vẽ sơ đồ nguyên lý & bố trí tủ CAD 2D từ ${devicesProp.length} thiết bị!`);
+    } else if (!pendingFile && !rawArrayBuffer && !svgContent) {
+      // Fallback: If no SLD devices exist yet, generate standard 2D CAD Panel Diagram (DB 40A) automatically
+      const defaultDevs = [
+        { id: "def_1", circuit: "VỎ TỦ ĐIỆN DB 12F", type: "VỎ TỦ", brand: "AIDE", model: "Enclosure 800x1200x300", pole: 3, current: 40, layer: "CABINET_FRAME" },
+        { id: "def_2", circuit: "CB TỔNG / INCOMER", type: "MCCB", brand: "LS", model: "MCCB 2P 40A 10kA", pole: 2, current: 40, icu: 10, layer: "EQUIPMENT_INCOMER" },
+        { id: "def_3", circuit: "MẠCH ĐIỀU KHIỂN FUSE", type: "FUSE", brand: "LS", model: "FUSE 6A", pole: 1, current: 6, icu: 6, layer: "CONTROL_CIRCUIT" },
+        { id: "def_4", circuit: "Feeder 1", type: "MCB", brand: "LS", model: "MCB 2P 16A 6kA", pole: 2, current: 16, icu: 6, layer: "EQUIPMENT_FEEDERS" },
+        { id: "def_5", circuit: "Feeder 2", type: "MCB", brand: "LS", model: "MCB 2P 16A 6kA", pole: 2, current: 16, icu: 6, layer: "EQUIPMENT_FEEDERS" },
+        { id: "def_6", circuit: "Feeder 3", type: "MCB", brand: "LS", model: "MCB 2P 32A 6kA", pole: 2, current: 32, icu: 6, layer: "EQUIPMENT_FEEDERS" },
+        { id: "def_7", circuit: "THANH CÁI PHÂN PHỐI", type: "BUSBAR", brand: "COPPER", model: "BUSBAR 40A", pole: 3, current: 40, layer: "BUSBAR_SYSTEM" },
+      ];
+      const generated = generateDynamicCadSvg(defaultDevs, projectName || "TỦ ĐIỆN PHÂN PHỐI DB");
+      setSvgContent(generated.svg);
+      setLayers(generated.layers);
+      onLayersChangeRef.current?.(generated.layers);
+      setDevices(generated.devices);
+      setEntityStats(generated.stats);
+      setBlocks(generated.blocks);
+      setAiAnalysis(generated.ai);
+      setFileName("Tu_Dien_DB_Standard.dwg");
+      setStatusType("success");
+      setStatusMessage("Đã tự động dựng sơ đồ CAD 2D tiêu chuẩn Tủ DB!");
     }
-  }, [devicesProp, projectName, pendingFile, rawArrayBuffer, svgContent]);
+  }, [devicesProp, projectName, pendingFile, rawArrayBuffer]);
 
   // Stable refs for actions
   const funcsRef = useRef({
