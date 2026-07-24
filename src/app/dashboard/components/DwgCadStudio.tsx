@@ -53,6 +53,7 @@ export interface DwgStudioStateData {
   devices: ExtractedCadEntity[];
   entityStats: DwgEntityStat[];
   blocks: DwgBlockInfo[];
+  thumbnail?: DwgThumbnailResult | null;
   versionInfo: DwgVersionInfo | null;
   aiAnalysis: DwgAiAnalysisResult | null;
   rawArrayBuffer: ArrayBuffer | null;
@@ -528,6 +529,7 @@ export default function DwgCadStudio({
         devices,
         entityStats,
         blocks,
+        thumbnail,
         versionInfo,
         aiAnalysis,
         rawArrayBuffer,
@@ -551,6 +553,7 @@ export default function DwgCadStudio({
     devices,
     entityStats,
     blocks,
+    thumbnail,
     versionInfo,
     aiAnalysis,
     rawArrayBuffer,
