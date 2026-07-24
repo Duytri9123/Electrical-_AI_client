@@ -851,6 +851,36 @@ export default function DashboardPage() {
   const userEmail = user?.email || "";
   const userInitial = userFullName.charAt(0).toUpperCase();
 
+  const handleOpenDwgStudioWithAi = useCallback(async () => {
+    setActiveTab("panel");
+    if (analysisResult && analysisResult.length > 0) {
+      try {
+        const res = await api.post("/projects/analyze-dwg-devices", {
+          devices: (analysisResult as any[]).map((d: any) => ({
+            type: d.type,
+            brand: d.brand || 'LS',
+            pole: d.pole || d.poles || 3,
+            current: d.in || d.current || 0,
+            name: d.circuit || d.name || '',
+            circuit: d.circuit || '',
+            model: d.model || d.matched_model || '',
+            icu: d.icu || null,
+          })),
+        });
+        if (res.data?.success && res.data?.data) {
+          const eng = res.data.data;
+          if (eng.devices) setAnalysisResult(eng.devices);
+          if (eng.coordination) setCoordinationResult(eng.coordination);
+          if (eng.thermal) setThermalResult(eng.thermal);
+          if (eng.busbar) setBusbarSpec(eng.busbar);
+          if (eng.layout) setLayoutData(eng.layout);
+        }
+      } catch (err) {
+        console.warn("[page.tsx] AI analysis trigger on Studio tab click:", err);
+      }
+    }
+  }, [analysisResult]);
+
   // SSR mount guard
   if (!isMounted) return null;
 
@@ -1063,7 +1093,7 @@ export default function DashboardPage() {
                 <span>Duyệt linh kiện</span>
               </button>
               <button
-                onClick={() => setActiveTab("panel")}
+                onClick={handleOpenDwgStudioWithAi}
                 className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs"
               >
                 <LayoutGrid className="w-3.5 h-3.5 text-white" />

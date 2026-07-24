@@ -359,11 +359,8 @@ export default function DwgCadStudio({
         <g data-layer="CABINET_FRAME">
           <rect x="60" y="60" width="1080" height="830" fill="none" stroke="#3b82f6" stroke-width="3.5" rx="10" />
           <rect x="80" y="80" width="1040" height="790" fill="#ffffff" fill-opacity="0.6" stroke="#94a3b8" stroke-width="1.5" rx="6" />
-          <rect x="730" y="765" width="380" height="95" fill="#f8fafc" stroke="#1e293b" stroke-width="2" />
-          <line x1="730" y1="795" x2="1110" y2="795" stroke="#1e293b" stroke-width="1.5" />
-          <text x="740" y="785" fill="#1e293b" font-family="sans-serif" font-size="12" font-weight="bold">SƠ ĐỒ NGUYÊN LÝ & PHÂN BỐ TỦ ĐIỆN CAD 2D</text>
-          <text x="740" y="815" fill="#2563eb" font-family="monospace" font-size="13" font-weight="bold">DỰ ÁN: ${projTitle.toUpperCase()}</text>
-          <text x="740" y="840" fill="#64748b" font-family="sans-serif" font-size="10">NGƯỜI LẬP: AIDE PRO AI | TỔNG CÔNG SUẤT: ${busbarCurrent}A</text>
+          <rect x="730" y="810" width="380" height="50" fill="#f8fafc" stroke="#1e293b" stroke-width="2" rx="6" />
+          <text x="920" y="840" fill="#2563eb" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">DỰ ÁN: ${projTitle.toUpperCase()}</text>
         </g>
 
         <g data-layer="BUSBAR_SYSTEM">
