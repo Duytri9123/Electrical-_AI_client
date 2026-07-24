@@ -560,12 +560,18 @@ export default function DwgCadStudio({
     pendingFile,
   ]);
 
-  // Zoom & Pan Handlers
+  const svgWrapperRef = useRef<HTMLDivElement>(null);
+  const animFrameIdRef = useRef<number | null>(null);
+
+  // Zoom & Pan Handlers (GPU accelerated requestAnimationFrame)
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.25, 4));
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.25, 0.25));
   const handleResetZoom = () => {
     setZoomLevel(1);
     setPanPos({ x: 0, y: 0 });
+    if (svgWrapperRef.current) {
+      svgWrapperRef.current.style.transform = `translate3d(0px, 0px, 0px) scale(1)`;
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -576,12 +582,28 @@ export default function DwgCadStudio({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning) {
-      setPanPos({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
-    }
+    if (!isPanning) return;
+    const nextX = e.clientX - panStart.x;
+    const nextY = e.clientY - panStart.y;
+
+    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+    animFrameIdRef.current = requestAnimationFrame(() => {
+      if (svgWrapperRef.current) {
+        svgWrapperRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0px) scale(${zoomLevel})`;
+        svgWrapperRef.current.style.willChange = "transform";
+      }
+    });
+    setPanPos({ x: nextX, y: nextY });
   };
 
-  const handleMouseUp = () => setIsPanning(false);
+  const handleMouseUp = () => {
+    if (isPanning) {
+      setIsPanning(false);
+      if (svgWrapperRef.current) {
+        svgWrapperRef.current.style.willChange = "auto";
+      }
+    }
+  };
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
@@ -704,6 +726,37 @@ export default function DwgCadStudio({
           </span>
         </div>
 
+        {/* Section View Navigator Overlay */}
+        {svgContent && (
+          <div className="absolute top-3 left-48 z-10 hidden lg:flex items-center space-x-1.5 bg-white/95 backdrop-blur-sm p-1.5 rounded-xl border border-slate-200 shadow-md text-xs font-bold">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider px-1">Khu Vực Bản Vẽ:</span>
+            <button
+              onClick={() => { setZoomLevel(1); setPanPos({ x: 0, y: 0 }); }}
+              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
+            >
+              Tất Cả (100%)
+            </button>
+            <button
+              onClick={() => { setZoomLevel(1.6); setPanPos({ x: 320, y: 80 }); }}
+              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
+            >
+              Mặt Tủ (EL 2 cánh)
+            </button>
+            <button
+              onClick={() => { setZoomLevel(1.6); setPanPos({ x: -220, y: 80 }); }}
+              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
+            >
+              Thanh Gá Tủ
+            </button>
+            <button
+              onClick={() => { setZoomLevel(1.6); setPanPos({ x: -620, y: 80 }); }}
+              className="px-2 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 rounded-lg transition-colors cursor-pointer text-[10.5px]"
+            >
+              Panel Lắp Thiết Bị
+            </button>
+          </div>
+        )}
+
         {/* Quick Stats Overlay on Canvas */}
         {svgContent && (
           <div className="absolute top-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-slate-200 shadow-md">
@@ -746,10 +799,12 @@ export default function DwgCadStudio({
             </div>
           ) : svgContent ? (
             <div
+              ref={svgWrapperRef}
               style={{
-                transform: `translate(${panPos.x}px, ${panPos.y}px) scale(${zoomLevel})`,
+                transform: `translate3d(${panPos.x}px, ${panPos.y}px, 0px) scale(${zoomLevel})`,
                 transformOrigin: "center center",
-                transition: isPanning ? "none" : "transform 0.15s ease-out",
+                transition: isPanning ? "none" : "transform 0.1s ease-out",
+                backfaceVisibility: "hidden",
                 width: "100%",
                 height: "100%",
               }}

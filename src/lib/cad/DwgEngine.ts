@@ -421,23 +421,37 @@ export class DwgEngineService {
   }
 
   /** Trích xuất thumbnail */
+  /** Trích xuất ảnh thumbnail BMP/PNG từ DWG Header */
   private extractThumbnail(engine: any, dwgRawPtr: any): DwgThumbnailResult | null {
-    const thumb = engine.dwg_bmp(dwgRawPtr);
-    if (!thumb || !thumb.data) return null;
+    try {
+      const thumb = engine.dwg_bmp(dwgRawPtr);
+      if (!thumb || !thumb.data || thumb.data.length === 0) return null;
 
-    let mimeType = 'image/png';
-    if (thumb.type === 2) mimeType = 'image/bmp';
-    else if (thumb.type === 3) mimeType = 'image/x-wmf';
+      let mimeType = 'image/png';
+      if (thumb.type === 2) mimeType = 'image/bmp';
+      else if (thumb.type === 3) mimeType = 'image/x-wmf';
 
-    const blob = new Blob([new Uint8Array(thumb.data)], { type: mimeType });
-    const blobUrl = URL.createObjectURL(blob);
+      const uint8 = new Uint8Array(thumb.data);
+      let binary = '';
+      const len = uint8.byteLength;
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(uint8[i]);
+      }
+      const base64 = typeof btoa !== 'undefined' ? btoa(binary) : '';
+      if (!base64) return null;
 
-    return {
-      data: thumb.data,
-      type: thumb.type,
-      mimeType,
-      blobUrl,
-    };
+      const blobUrl = `data:${mimeType};base64,${base64}`;
+
+      return {
+        data: thumb.data,
+        type: thumb.type,
+        mimeType,
+        blobUrl,
+      };
+    } catch (e) {
+      console.warn('[DwgEngine] Thumbnail extraction error:', e);
+      return null;
+    }
   }
 
   /** Lấy danh sách layers */
