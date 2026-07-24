@@ -4,6 +4,16 @@ import { SectionalLayerSheet } from "./cad/SectionalLayerSheet";
 import { CubicleForm2BSheet } from "./cad/CubicleForm2BSheet";
 import { Indoor2DoorSheet } from "./cad/Indoor2DoorSheet";
 import { Standard5MPlates } from "./cad/Standard5MPlates";
+import {
+  LayerDefinition,
+  getAllLayers,
+  toggleLayerVisibility,
+  toggleLayerLock,
+  getDeviceLayer,
+  ZONE_LABELS,
+  ZONE_COLORS,
+  LayerId,
+} from "../../../lib/engine/LayerManager";
 
 interface Device {
   id: string;
@@ -68,7 +78,7 @@ interface CabinetParams {
 }
 
 type LayerKey = "all" | "m1" | "m2" | "m3" | "m4" | "m5";
-type RightTabKey = "props" | "iec" | "enclosure" | "materials";
+type RightTabKey = "props" | "iec" | "enclosure" | "materials" | "layers";
 
 function Solid3DCube({
   width,
@@ -190,6 +200,9 @@ export default function PanelDesign({ devices, layoutData, graphData }: PanelDes
   // Floating Side Panel tab & visibility state
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState<RightTabKey>("props");
+  // Layer manager state
+  const [engineLayers, setEngineLayers] = useState<LayerDefinition[]>(getAllLayers());
+  const [activeLayerId, setActiveLayerId] = useState<LayerId | null>(null);
   // Selected device reference
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   
@@ -1310,21 +1323,21 @@ EOF`;
                 <div className="w-80 bg-slate-900 text-slate-200 border-l border-slate-800 flex flex-col z-10 shrink-0 h-full max-h-full overflow-hidden select-none">
                   {/* Panel header tabs + Close button */}
                   <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-2 shrink-0">
-                    <div className="grid grid-cols-4 flex-1 text-center font-bold text-[10px] uppercase select-none">
-                      {(["props", "iec", "enclosure", "materials"] as RightTabKey[]).map((tabKey) => {
-                        const label = { props: "Props", iec: "IEC", enclosure: "Enclosure", materials: "Materials" }[tabKey];
+                    <div className="grid grid-cols-5 flex-1 text-center font-bold text-[10px] uppercase select-none">
+                      {(["props", "iec", "enclosure", "materials", "layers"] as RightTabKey[]).map((tabKey) => {
+                        const label: Record<RightTabKey,string> = { props: "Props", iec: "IEC", enclosure: "Vỏ tủ", materials: "BOM", layers: "Layers" };
                         const isActive = activeRightTab === tabKey;
                         return (
                           <button
                             key={tabKey}
                             onClick={() => setActiveRightTab(tabKey)}
-                            className={`py-3 transition-colors cursor-pointer border-b-2 ${
+                            className={`py-3 transition-colors cursor-pointer border-b-2 text-[9px] ${
                               isActive
                                 ? "text-emerald-400 border-emerald-500 bg-slate-900"
                                 : "text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-900/50"
                             }`}
                           >
-                            {label}
+                            {label[tabKey]}
                           </button>
                         );
                       })}
@@ -1419,6 +1432,129 @@ EOF`;
                           <span className="text-emerald-500 font-bold">✓ OK</span>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* ═══════════════════════════════════════════════════
+                      LAYERS TAB — IEC 61082-1 Engineering Drawing Layers
+                      ═══════════════════════════════════════════════════ */}
+                  {activeRightTab === "layers" && (
+                    <div className="space-y-2 flex-1 text-[10.5px]">
+                      {/* Header */}
+                      <div className="bg-slate-950 border border-slate-800 p-2.5 rounded-lg">
+                        <div className="font-bold text-amber-400 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                          <span>🗂</span> Layer Manager
+                        </div>
+                        <p className="text-[9.5px] text-slate-500 leading-relaxed">
+                          11 lớp chuẩn IEC 61082-1. Click 👁 để ẩn/hiện, 🔒 để khoá layer.
+                        </p>
+                        {activeLayerId && (
+                          <div className="mt-1.5 bg-blue-950 border border-blue-800 rounded px-2 py-1 text-[9px] text-blue-300 font-mono">
+                            Active: <span className="text-blue-200 font-bold">{activeLayerId.replace("LAYER_","")}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Shortcut buttons */}
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setEngineLayers(getAllLayers().map(l => ({...l, visible: true})))}
+                          className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded px-2 py-1 text-[9px] font-bold text-slate-300 cursor-pointer transition-colors"
+                        >
+                          👁 Hiện tất cả
+                        </button>
+                        <button
+                          onClick={() => setEngineLayers(getAllLayers().map(l => ({...l, visible: false})))}
+                          className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded px-2 py-1 text-[9px] font-bold text-slate-400 cursor-pointer transition-colors"
+                        >
+                          🚫 Ẩn tất cả
+                        </button>
+                      </div>
+
+                      {/* Layer list grouped by zone */}
+                      {(Object.keys(ZONE_LABELS) as Array<keyof typeof ZONE_LABELS>).map((zone) => {
+                        const zoneLayers = engineLayers.filter(l => l.zone === zone);
+                        if (zoneLayers.length === 0) return null;
+                        return (
+                          <div key={zone}>
+                            <div
+                              className="text-[9px] font-extrabold uppercase tracking-widest px-1.5 py-1 rounded-t border-b border-slate-700 mb-0"
+                              style={{ background: ZONE_COLORS[zone], color: '#334155' }}
+                            >
+                              {ZONE_LABELS[zone]}
+                            </div>
+                            <div className="space-y-0.5">
+                              {zoneLayers.map((layer) => {
+                                const isActive = activeLayerId === layer.id;
+                                return (
+                                  <div
+                                    key={layer.id}
+                                    onClick={() => setActiveLayerId(layer.id === activeLayerId ? null : layer.id)}
+                                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-sm cursor-pointer transition-all border ${
+                                      isActive
+                                        ? "bg-blue-900/60 border-blue-600/60"
+                                        : "bg-slate-900 border-transparent hover:bg-slate-800 hover:border-slate-700"
+                                    } ${!layer.visible ? "opacity-40" : ""}`}
+                                  >
+                                    {/* Color swatch */}
+                                    <div
+                                      className="w-3 h-3 rounded-full border border-slate-600 shrink-0"
+                                      style={{ background: layer.color }}
+                                    />
+
+                                    {/* Name */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className={`font-mono text-[9px] truncate ${
+                                        isActive ? "text-blue-200 font-bold" : "text-slate-300"
+                                      }`}>
+                                        {layer.name}
+                                      </div>
+                                      <div className="text-[8px] text-slate-600 truncate">{layer.description.slice(0, 38)}…</div>
+                                    </div>
+
+                                    {/* Line weight badge */}
+                                    <span className="text-[8px] text-slate-600 font-mono shrink-0">{layer.lineWeight}</span>
+
+                                    {/* Visibility toggle */}
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setEngineLayers(prev => toggleLayerVisibility(prev, layer.id)); }}
+                                      className="text-[10px] cursor-pointer hover:scale-125 transition-transform"
+                                      title={layer.visible ? "Ẩn layer" : "Hiện layer"}
+                                    >
+                                      {layer.visible ? "👁" : "🚫"}
+                                    </button>
+
+                                    {/* Lock toggle */}
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setEngineLayers(prev => toggleLayerLock(prev, layer.id)); }}
+                                      className="text-[10px] cursor-pointer hover:scale-125 transition-transform"
+                                      title={layer.locked ? "Mở khoá" : "Khoá layer"}
+                                    >
+                                      {layer.locked ? "🔒" : "🔓"}
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Active device → layer mapping */}
+                      {selectedDevice && (
+                        <div className="mt-2 bg-slate-950 border border-slate-700 rounded-lg p-2.5">
+                          <div className="text-[9px] font-bold text-amber-400 uppercase mb-1.5">📍 Layer của thiết bị</div>
+                          <div className="text-[9px] font-mono text-slate-400">
+                            <span className="text-slate-200">{selectedDevice.type}</span> → <span className="text-blue-300 font-bold">{getDeviceLayer(selectedDevice.type).replace("LAYER_","")}</span>
+                          </div>
+                          <button
+                            onClick={() => setActiveLayerId(getDeviceLayer(selectedDevice.type))}
+                            className="mt-1.5 w-full bg-blue-900 hover:bg-blue-800 border border-blue-700 rounded px-2 py-1 text-[9px] font-bold text-blue-200 cursor-pointer transition-colors"
+                          >
+                            → Chọn layer này
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
