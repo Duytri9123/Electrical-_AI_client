@@ -96,25 +96,25 @@ export default function Sidebar({
   const [panelMainTab, setPanelMainTab] = useState<"devices" | "management">("devices");
   const [panelSubTab, setPanelSubTab] = useState<"devices" | "busbar" | "acc" | "door">("devices");
 
-  const tabScrollRef = React.useRef<HTMLDivElement>(null);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  // Mouse Drag-to-Scroll for Panel Sub-Tabs
+  const subTabScrollRef = React.useRef<HTMLDivElement>(null);
+  const [isSubTabDragging, setIsSubTabDragging] = useState(false);
+  const [subTabStartX, setSubTabStartX] = useState(0);
+  const [subTabScrollLeft, setSubTabScrollLeft] = useState(0);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!tabScrollRef.current) return;
-    setIsMouseDown(true);
-    setStartX(e.pageX - tabScrollRef.current.offsetLeft);
-    setScrollLeft(tabScrollRef.current.scrollLeft);
+  const handleSubTabMouseDown = (e: React.MouseEvent) => {
+    if (!subTabScrollRef.current) return;
+    setIsSubTabDragging(true);
+    setSubTabStartX(e.pageX - subTabScrollRef.current.offsetLeft);
+    setSubTabScrollLeft(subTabScrollRef.current.scrollLeft);
   };
-  const handleMouseLeave = () => setIsMouseDown(false);
-  const handleMouseUp = () => setIsMouseDown(false);
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isMouseDown || !tabScrollRef.current) return;
+  const handleSubTabMouseLeaveOrUp = () => setIsSubTabDragging(false);
+  const handleSubTabMouseMove = (e: React.MouseEvent) => {
+    if (!isSubTabDragging || !subTabScrollRef.current) return;
     e.preventDefault();
-    const x = e.pageX - tabScrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    tabScrollRef.current.scrollLeft = scrollLeft - walk;
+    const x = e.pageX - subTabScrollRef.current.offsetLeft;
+    const walk = (x - subTabStartX) * 2;
+    subTabScrollRef.current.scrollLeft = subTabScrollLeft - walk;
   };
 
   return (
@@ -265,79 +265,113 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* TAB LIBRARY SIDEBAR: SEARCH & FILTERS */}
+        {/* TAB LIBRARY SIDEBAR: SEARCH & FILTERS REDESIGNED */}
         {activeTab === "library" && (
           <div className="space-y-3 font-sans">
-            <div className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 pb-1.5">
-              <span>🔍 LỌC THƯ VIỆN THIẾT BỊ</span>
-            </div>
-
-            {/* Brand Selection Dropdown */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Thương hiệu hãng</label>
-              <select
-                value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
-                className="w-full bg-white border border-slate-200 text-slate-800 text-xs font-bold py-1.5 px-2.5 rounded-lg focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer"
-              >
-                <option value="LS">LS Industrial Systems</option>
-                <option value="ABB">ABB Electric</option>
-                <option value="Schneider">Schneider Electric</option>
-                <option value="CHINT">CHINT Electric</option>
-                <option value="Mitsubishi">Mitsubishi Electric</option>
-                <option value="EMIC">EMIC Đo Lường</option>
-                <option value="Samwha">Samwha Tụ Bù</option>
-              </select>
-            </div>
-
-            {/* Search Model Input */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm Mã SP / Tên</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Nhập mã SP (vd: ABN103c...)"
-                  value={libSearchTerm}
-                  onChange={(e) => setLibSearchTerm && setLibSearchTerm(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs py-1.5 pl-2.5 pr-8 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
-                />
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs space-y-3">
+              {/* Filter Section Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+                  <span className="text-blue-600">🔍</span>
+                  <span>LỌC THƯ VIỆN THIẾT BỊ</span>
+                </span>
+                {(selectedBrand !== "LS" || libSearchTerm || libTypeFilter !== "all" || libPoleFilter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSelectedBrand("LS");
+                      if (setLibSearchTerm) setLibSearchTerm("");
+                      if (setLibTypeFilter) setLibTypeFilter("all");
+                      if (setLibPoleFilter) setLibPoleFilter("all");
+                    }}
+                    className="text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md border border-blue-200 transition-colors cursor-pointer flex items-center space-x-1"
+                  >
+                    <span>🔄</span>
+                    <span>Xóa lọc</span>
+                  </button>
+                )}
               </div>
-            </div>
 
-            {/* Type Filter */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Loại thiết bị</label>
-              <select
-                value={libTypeFilter}
-                onChange={(e) => setLibTypeFilter && setLibTypeFilter(e.target.value)}
-                className="w-full bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-1.5 px-2.5 rounded-lg focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer"
-              >
-                <option value="all">Tất cả loại thiết bị</option>
-                <option value="MCCB">Aptomat MCCB</option>
-                <option value="MCB">Aptomat nhánh MCB</option>
-                <option value="ACB">Máy cắt không khí ACB</option>
-                <option value="CONTACTOR">Khởi động từ Contactor</option>
-                <option value="RELAY">Rơ le nhiệt / Rơ le trung gian</option>
-                <option value="PLC">Bộ điều khiển PLC</option>
-                <option value="TERMINAL">Cầu đấu dây Terminal</option>
-              </select>
-            </div>
+              {/* Brand Selection Dropdown */}
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Thương hiệu hãng</label>
+                  <span className="text-[9.5px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-100">
+                    {selectedBrand}
+                  </span>
+                </div>
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-900 text-xs font-bold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer transition-all"
+                >
+                  <option value="LS">LS Industrial Systems</option>
+                  <option value="ABB">ABB Electric</option>
+                  <option value="Schneider">Schneider Electric</option>
+                  <option value="CHINT">CHINT Electric</option>
+                  <option value="Mitsubishi">Mitsubishi Electric</option>
+                  <option value="EMIC">EMIC Đo Lường</option>
+                  <option value="Samwha">Samwha Tụ Bù</option>
+                </select>
+              </div>
 
-            {/* Pole Filter */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Số cực (Pole)</label>
-              <select
-                value={libPoleFilter}
-                onChange={(e) => setLibPoleFilter && setLibPoleFilter(e.target.value)}
-                className="w-full bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-1.5 px-2.5 rounded-lg focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer"
-              >
-                <option value="all">Tất cả số cực</option>
-                <option value="1">1 Pha (1P)</option>
-                <option value="2">2 Pha (2P)</option>
-                <option value="3">3 Pha (3P)</option>
-                <option value="4">4 Pha (4P)</option>
-              </select>
+              {/* Search Model Input */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tìm kiếm Mã SP / Tên</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Nhập mã SP (vd: ABN103c...)"
+                    value={libSearchTerm}
+                    onChange={(e) => setLibSearchTerm && setLibSearchTerm(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-xs py-2 pl-2.5 pr-8 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono transition-all"
+                  />
+                  {libSearchTerm ? (
+                    <button
+                      onClick={() => setLibSearchTerm && setLibSearchTerm("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                    >
+                      ✕
+                    </button>
+                  ) : (
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Type Filter */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Loại thiết bị</label>
+                <select
+                  value={libTypeFilter}
+                  onChange={(e) => setLibTypeFilter && setLibTypeFilter(e.target.value)}
+                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer transition-all"
+                >
+                  <option value="all">Tất cả loại thiết bị</option>
+                  <option value="MCCB">Aptomat MCCB</option>
+                  <option value="MCB">Aptomat nhánh MCB</option>
+                  <option value="ACB">Máy cắt không khí ACB</option>
+                  <option value="CONTACTOR">Khởi động từ Contactor</option>
+                  <option value="RELAY">Rơ le nhiệt / Rơ le trung gian</option>
+                  <option value="PLC">Bộ điều khiển PLC</option>
+                  <option value="TERMINAL">Cầu đấu dây Terminal</option>
+                </select>
+              </div>
+
+              {/* Pole Filter */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Số cực (Pole)</label>
+                <select
+                  value={libPoleFilter}
+                  onChange={(e) => setLibPoleFilter && setLibPoleFilter(e.target.value)}
+                  className="w-full bg-slate-50 hover:bg-white border border-slate-200 text-slate-800 text-xs font-semibold py-2 px-2.5 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs cursor-pointer transition-all"
+                >
+                  <option value="all">Tất cả số cực</option>
+                  <option value="1">1 Pha (1P)</option>
+                  <option value="2">2 Pha (2P)</option>
+                  <option value="3">3 Pha (3P)</option>
+                  <option value="4">4 Pha (4P)</option>
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -423,14 +457,21 @@ export default function Sidebar({
                   </div>
                 </div>
 
-                {/* Sub-tab Category Buttons (SWIPER SMOOTH HORIZONTAL SCROLL) */}
-                <div className="flex items-center space-x-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 overflow-x-auto whitespace-nowrap text-[11px] font-bold shrink-0 custom-scrollbar scrollbar-none py-1.5">
+                {/* Sub-tab Category Buttons (SWIPER SMOOTH HORIZONTAL SCROLL & MOUSE DRAG-TO-SCROLL) */}
+                <div
+                  ref={subTabScrollRef}
+                  onMouseDown={handleSubTabMouseDown}
+                  onMouseLeave={handleSubTabMouseLeaveOrUp}
+                  onMouseUp={handleSubTabMouseLeaveOrUp}
+                  onMouseMove={handleSubTabMouseMove}
+                  className="flex items-center space-x-1.5 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 overflow-x-auto whitespace-nowrap text-[11px] font-bold shrink-0 custom-scrollbar scrollbar-none py-1.5 select-none cursor-grab active:cursor-grabbing"
+                >
                   <button
                     onClick={() => setPanelSubTab("devices")}
                     className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
                       panelSubTab === "devices"
-                        ? "bg-white text-blue-700 shadow-xs border border-slate-200/60"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                        ? "bg-white text-blue-700 shadow-xs border border-slate-200/60 font-black"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
                     }`}
                   >
                     <span>🔌</span>
@@ -440,8 +481,8 @@ export default function Sidebar({
                     onClick={() => setPanelSubTab("busbar")}
                     className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
                       panelSubTab === "busbar"
-                        ? "bg-white text-amber-700 shadow-xs border border-slate-200/60"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                        ? "bg-white text-amber-700 shadow-xs border border-slate-200/60 font-black"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
                     }`}
                   >
                     <span>⚡</span>
@@ -451,8 +492,8 @@ export default function Sidebar({
                     onClick={() => setPanelSubTab("acc")}
                     className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
                       panelSubTab === "acc"
-                        ? "bg-white text-emerald-700 shadow-xs border border-slate-200/60"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                        ? "bg-white text-emerald-700 shadow-xs border border-slate-200/60 font-black"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
                     }`}
                   >
                     <span>🧩</span>
@@ -462,8 +503,8 @@ export default function Sidebar({
                     onClick={() => setPanelSubTab("door")}
                     className={`py-1.5 px-3 rounded-lg cursor-pointer transition-all shrink-0 flex items-center space-x-1 ${
                       panelSubTab === "door"
-                        ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                        ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold"
                     }`}
                   >
                     <span>🚪</span>
