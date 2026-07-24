@@ -119,8 +119,8 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`h-full w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-30 transition-all duration-300 select-none font-sans ${
-        sidebarOpen ? "w-72 opacity-100" : "w-0 opacity-0 overflow-hidden pointer-events-none border-none"
+      className={`h-full w-84 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-30 transition-all duration-300 select-none font-sans ${
+        sidebarOpen ? "w-84 opacity-100" : "w-0 opacity-0 overflow-hidden pointer-events-none border-none"
       }`}
     >
       {/* BRAND LOGO HEADER AT VERY TOP OF SIDEBAR */}
