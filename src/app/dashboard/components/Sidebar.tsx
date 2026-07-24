@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import {
+  Image as ImageIcon,
   Zap,
   UploadCloud,
   FileText,
@@ -532,6 +533,28 @@ export default function Sidebar({
                       {(dwgStudioData.fileSize / 1024).toFixed(1)} KB
                     </span>
                   </div>
+
+                  {/* Thumbnail Image Preview if present in DWG Header */}
+                  {dwgStudioData.thumbnail?.blobUrl && (
+                    <div className="pt-2 border-t border-slate-100 space-y-1">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                        <span className="flex items-center space-x-1">
+                          <ImageIcon className="w-3 h-3 text-indigo-600" />
+                          <span>Thumbnail DWG Header</span>
+                        </span>
+                        <span className="text-[9px] text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100 font-mono">
+                          {dwgStudioData.thumbnail.mimeType ? dwgStudioData.thumbnail.mimeType.split('/')[1].toUpperCase() : 'BMP'}
+                        </span>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-100 p-1 flex items-center justify-center max-h-36">
+                        <img
+                          src={dwgStudioData.thumbnail.blobUrl}
+                          alt="Thumbnail Header DWG"
+                          className="max-h-32 w-auto object-contain rounded-lg shadow-2xs"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Explicit Analyze Trigger Button */}
                   {dwgStudioData.onStartParse && (

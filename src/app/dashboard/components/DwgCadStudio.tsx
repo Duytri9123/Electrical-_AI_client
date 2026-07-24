@@ -104,6 +104,7 @@ export default function DwgCadStudio({
   const [versionInfo, setVersionInfo] = useState<DwgVersionInfo | null>(null);
   const [conversionStats, setConversionStats] = useState<DwgConversionStats | null>(null);
   const [thumbnail, setThumbnail] = useState<DwgThumbnailResult | null>(null);
+  const [showThumbnailModal, setShowThumbnailModal] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<DwgAiAnalysisResult | null>(null);
   const [databaseJson, setDatabaseJson] = useState<any>(null);
   const [rawArrayBuffer, setRawArrayBuffer] = useState<ArrayBuffer | null>(null);
@@ -639,7 +640,16 @@ export default function DwgCadStudio({
             </button>
           )}
 
-
+          {thumbnail?.blobUrl && (
+            <button
+              onClick={() => setShowThumbnailModal(true)}
+              className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-lg transition-all cursor-pointer shadow-2xs"
+              title="Xem ảnh Thumbnail nhúng trong Header file DWG"
+            >
+              <ImageIcon className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Thumbnail DWG</span>
+            </button>
+          )}
 
           {svgContent && (
             <button
@@ -796,6 +806,48 @@ export default function DwgCadStudio({
           )}
         </div>
       </div>
+      {/* DWG Header Thumbnail Modal */}
+      {showThumbnailModal && thumbnail?.blobUrl && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 relative">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">DWG HEADER EMBEDDED THUMBNAIL</h3>
+                  <p className="text-[10.5px] text-slate-400 font-medium mt-0.5">Ảnh xem trước bitmap nhúng trong tiêu đề file AutoCAD DWG</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowThumbnailModal(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 bg-slate-100 rounded-xl border border-slate-200/80 flex items-center justify-center min-h-[220px]">
+              <img
+                src={thumbnail.blobUrl}
+                alt="DWG Header Thumbnail"
+                className="max-h-[320px] w-auto object-contain rounded-lg shadow-md"
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[10.5px] text-slate-500 font-mono pt-1">
+              <span>Định dạng: {thumbnail.mimeType ? thumbnail.mimeType.split('/')[1].toUpperCase() : 'BMP'}</span>
+              <button
+                onClick={() => setShowThumbnailModal(false)}
+                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl cursor-pointer shadow-xs transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
