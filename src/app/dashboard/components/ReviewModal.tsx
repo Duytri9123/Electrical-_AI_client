@@ -125,7 +125,7 @@ export default function ReviewModal({
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 uppercase">Số Cực (Poles)</label>
                 <select
-                  value={currentDevice.pole}
+                  value={currentDevice.pole ?? 3}
                   onChange={(e) => onUpdateDevice(currentIndex, "pole", parseInt(e.target.value))}
                   className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500 transition-all"
                 >
@@ -141,7 +141,7 @@ export default function ReviewModal({
                 <label className="text-[10px] font-bold text-slate-400 uppercase">Dòng Định Mức (A)</label>
                 <input
                   type="number"
-                  value={currentDevice.current}
+                  value={currentDevice.current ?? 0}
                   onChange={(e) => onUpdateDevice(currentIndex, "current", parseInt(e.target.value) || 0)}
                   className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500 transition-all"
                 />
@@ -152,7 +152,7 @@ export default function ReviewModal({
                 <label className="text-[10px] font-bold text-slate-400 uppercase">Dòng Cắt Icu (kA)</label>
                 <input
                   type="text"
-                  value={currentDevice.icu}
+                  value={currentDevice.icu ?? ""}
                   onChange={(e) => onUpdateDevice(currentIndex, "icu", e.target.value)}
                   className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500 transition-all"
                 />

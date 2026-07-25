@@ -556,25 +556,36 @@ export default function Sidebar({
                     </div>
                   )}
 
-                  {/* Explicit Analyze Trigger Button */}
-                  {dwgStudioData.onStartParse && (
+                  {/* Explicit Analyze & AI Action Buttons */}
+                  <div className="space-y-1.5 pt-1">
+                    {dwgStudioData.onStartParse && (
+                      <button
+                        onClick={() => dwgStudioData.onStartParse()}
+                        disabled={dwgStudioData.loading}
+                        className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-500/20 cursor-pointer transition-all flex items-center justify-center space-x-2"
+                      >
+                        {dwgStudioData.loading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Play className="w-4 h-4 fill-current" />
+                        )}
+                        <span>
+                          {dwgStudioData.loading
+                            ? "ĐANG PHÂN TÍCH..."
+                            : "BẮT ĐẦU PHÂN TÍCH DWG"}
+                        </span>
+                      </button>
+                    )}
+
                     <button
-                      onClick={() => dwgStudioData.onStartParse()}
-                      disabled={dwgStudioData.loading}
-                      className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-500/20 cursor-pointer transition-all flex items-center justify-center space-x-2"
+                      onClick={() => dwgStudioData.onRunAiAnalysis?.()}
+                      className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-purple-500/20 cursor-pointer transition-all flex items-center justify-center space-x-2"
+                      title="Phân tích kỹ thuật chuyên sâu bằng AI (Phối hợp bảo vệ, tản nhiệt, busbar)"
                     >
-                      {dwgStudioData.loading ? (
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Play className="w-4 h-4 fill-current" />
-                      )}
-                      <span>
-                        {dwgStudioData.loading
-                          ? "ĐANG PHÂN TÍCH..."
-                          : "BẮT ĐẦU PHÂN TÍCH DWG"}
-                      </span>
+                      <Sparkles className="w-4 h-4 fill-current text-amber-300" />
+                      <span>AI PHÂN TÍCH KỸ THUẬT</span>
                     </button>
-                  )}
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
