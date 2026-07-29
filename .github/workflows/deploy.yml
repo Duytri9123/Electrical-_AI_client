@@ -48,4 +48,4 @@ jobs:
             **/node_modules/**
             **/.next/cache/**
             **/.env*
-            **/README.md
+            **/README.md 
